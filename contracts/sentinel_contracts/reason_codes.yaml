@@ -1,0 +1,25 @@
+L1:
+  URL_BLOCKED: "URL matched a blocked rule"
+  URL_SUSPICIOUS: "URL contains suspicious characteristics"
+  PAGE_SUSPICIOUS: "Page content triggered a heuristic"
+  HEURISTIC_HIGH_RISK: "Multiple Layer 1 heuristics indicate high risk"
+
+L2:
+  PROMPT_INJECTION: "Prompt classified as malicious or injection-like"
+  PROMPT_SUSPICIOUS: "Prompt contains suspicious instructions"
+  PROMPT_SAFE: "Prompt classified as benign"
+
+L3:
+  TABULAR_HIGH_RISK: "Tabular fraud model produced a high-risk score"
+  GRAPH_HIGH_RISK: "Graph fraud model produced a high-risk score"
+  TRANSACTION_ANOMALY: "Transaction contains anomalous characteristics"
+
+DECISION:
+  RISK_HIGH: "Combined risk exceeded blocking threshold"
+  RISK_MEDIUM: "Combined risk requires additional verification"
+  RISK_LOW: "Combined risk is below escalation thresholds"
+
+SYSTEM:
+  MODEL_UNAVAILABLE: "Required model was unavailable"
+  INVALID_INPUT: "Input failed contract validation"
+  INTERNAL_ERROR: "Internal SENTINEL processing error"

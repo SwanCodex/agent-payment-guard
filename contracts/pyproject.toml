@@ -1,0 +1,14 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sentinel-contracts"
+version = "0.1.0"
+description = "Shared contracts and schemas for the SENTINEL payment guard"
+requires-python = ">=3.11,<3.12"
+dependencies = []
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

@@ -1,0 +1,74 @@
+# =========================
+# SENTINEL Git Ignore
+# =========================
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# Testing / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# Formatting / tooling
+.ruff_cache/
+.mypy_cache/
+.pyre/
+.dmypy.json
+dmypy.json
+
+# ML experiment tracking
+mlruns/
+wandb/
+outputs/
+runs/
+
+# Data - NEVER commit datasets
+data/raw/*
+data/interim/*
+data/processed/*
+
+# Keep directory placeholders
+!data/raw/.gitkeep
+!data/interim/.gitkeep
+!data/processed/.gitkeep
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDEs
+.vscode/
+.idea/
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Model artifacts - tracked through Git LFS
+# These are NOT ignored because Git LFS tracks them.
