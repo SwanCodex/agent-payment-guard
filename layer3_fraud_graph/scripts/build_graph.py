@@ -99,7 +99,7 @@ def validate_graph(
     card_edges: pd.DataFrame,
     device_edges: pd.DataFrame,
 ) -> None:
-    transaction_ids = set(transactions["TransactionID"])
+    transaction_ids = set(transactions["transaction_id"])
 
     for name, edges, nodes in [
         ("card", card_edges, card_nodes),
