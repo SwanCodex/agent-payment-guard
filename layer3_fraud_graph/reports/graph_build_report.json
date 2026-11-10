@@ -1,0 +1,18 @@
+{
+  "dataset": "IEEE-CIS",
+  "split": "train",
+  "graph_type": "heterogeneous_temporal",
+  "transaction_nodes": 590540,
+  "card_nodes": 38197,
+  "device_nodes": 2068,
+  "transaction_to_card_edges": 514655,
+  "transaction_to_device_edges": 75306,
+  "transactions_without_card_edge": 75885,
+  "transactions_without_device_edge": 515234,
+  "unique_transaction_timestamps": 573349,
+  "relations": [
+    "transaction_to_card",
+    "transaction_to_device"
+  ],
+  "temporal_edge_policy": "An edge is eligible as historical context only when edge timestamp is strictly less than target timestamp."
+}

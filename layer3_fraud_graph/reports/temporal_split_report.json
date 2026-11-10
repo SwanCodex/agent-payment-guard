@@ -1,0 +1,73 @@
+{
+  "dataset": "IEEE-CIS Fraud Detection",
+  "total_transactions": 590540,
+  "method": "chronological_timestamp_grouped",
+  "target_split_proportions": {
+    "train": 0.7,
+    "val1": 0.1,
+    "val2": 0.1,
+    "test": 0.1
+  },
+  "boundaries": [
+    {
+      "after_split": "train",
+      "cumulative_transactions": 413378,
+      "boundary_timestamp": 10437996,
+      "target_fraction": 0.7
+    },
+    {
+      "after_split": "val1",
+      "cumulative_transactions": 472432,
+      "boundary_timestamp": 12192842,
+      "target_fraction": 0.8
+    },
+    {
+      "after_split": "val2",
+      "cumulative_transactions": 531486,
+      "boundary_timestamp": 13990904,
+      "target_fraction": 0.9
+    }
+  ],
+  "splits": {
+    "train": {
+      "transactions": 413378,
+      "percentage": 70.0,
+      "fraud_transactions": 14538,
+      "non_fraud_transactions": 398840,
+      "fraud_rate": 0.035169,
+      "min_timestamp": 86400,
+      "max_timestamp": 10437996
+    },
+    "val1": {
+      "transactions": 59054,
+      "percentage": 10.0,
+      "fraud_transactions": 2061,
+      "non_fraud_transactions": 56993,
+      "fraud_rate": 0.0349,
+      "min_timestamp": 10438003,
+      "max_timestamp": 12192842
+    },
+    "val2": {
+      "transactions": 59054,
+      "percentage": 10.0,
+      "fraud_transactions": 1851,
+      "non_fraud_transactions": 57203,
+      "fraud_rate": 0.031344,
+      "min_timestamp": 12192900,
+      "max_timestamp": 13990904
+    },
+    "test": {
+      "transactions": 59054,
+      "percentage": 10.0,
+      "fraud_transactions": 2213,
+      "non_fraud_transactions": 56841,
+      "fraud_rate": 0.037474,
+      "min_timestamp": 13990941,
+      "max_timestamp": 15811131
+    }
+  },
+  "unique_timestamps": 573349,
+  "timestamp_groups_never_split": true,
+  "chronological_order_validated": true,
+  "transaction_assignment_sha256": "b3ada668d9b7d3456477a2d4180550aff74c3f32a1018c4d18318039f7e8e20d"
+}

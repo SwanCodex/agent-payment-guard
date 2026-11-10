@@ -72,3 +72,4 @@ logs/
 
 # Model artifacts - tracked through Git LFS
 # These are NOT ignored because Git LFS tracks them.
+*.egg-info/
