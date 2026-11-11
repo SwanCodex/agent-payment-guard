@@ -1,0 +1,23 @@
+data:
+  raw_pool: pilot_raw.parquet
+  dropped_sources: [mosscap]
+  dedupe: {method: minhash_lsh, shingle: char5, jaccard: 0.8, num_perm: 128, max_per_cluster: 2}
+  split: {train: 0.8, val: 0.1, test: 0.1, by: cluster, seed: 42}
+  train_balance: {target_positives: 3200, source_cap_frac: 0.30, hard_negative_floor: 0.25, length_matched: true}
+model:
+  name: microsoft/deberta-v3-base
+  max_len: 256
+  batch_size: 16
+  lr: 2.0e-5
+  epochs: 2
+  warmup: 0.06
+  weight_decay: 0.01
+  label_smoothing: 0.05
+  seeds: [1, 2, 3]
+  release_seed: 1
+calibration:
+  deploy_prior: 0.01
+  train_prior: 0.5
+  calibration_set: val + extra benign rows (up to 4x val benign, per source)
+  tau_block_fpr: 0.005
+  tau_allow_fnr: 0.01

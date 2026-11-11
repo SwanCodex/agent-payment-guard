@@ -1,0 +1,41 @@
+{
+  "seed": 42,
+  "jaccard": 0.8,
+  "num_perm": 128,
+  "shingle": "char5",
+  "max_per_cluster": 2,
+  "min_tokens": 5,
+  "rows": {
+    "raw": 20511,
+    "after_min_len": 19036,
+    "after_exact_dedupe": 18887,
+    "after_cluster_cap": 18219
+  },
+  "train_balanced": {
+    "n": 5146,
+    "by_source": {
+      "0/amazon_descriptions": 191,
+      "0/amazon_reviews": 672,
+      "0/dolly": 670,
+      "0/enron": 505,
+      "0/oasst1": 535,
+      "1/gandalf": 653,
+      "1/hackaprompt": 960,
+      "1/tensor_trust": 960
+    }
+  },
+  "val": {
+    "n": 1819,
+    "label_counts": {
+      "0": 1326,
+      "1": 493
+    }
+  },
+  "test": {
+    "n": 1825,
+    "label_counts": {
+      "0": 1315,
+      "1": 510
+    }
+  }
+}

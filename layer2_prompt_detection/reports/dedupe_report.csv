@@ -1,0 +1,9 @@
+source,rows_before,rows_after,pct_removed
+amazon_descriptions,1453,1452,0.1
+amazon_reviews,3704,3704,0.0
+dolly,2310,2298,0.5
+enron,3923,3823,2.5
+gandalf,795,795,0.0
+hackaprompt,3208,3021,5.8
+oasst1,1891,1891,0.0
+tensor_trust,1603,1235,23.0

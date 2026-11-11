@@ -1,0 +1,25 @@
+{
+  "model": "microsoft/deberta-v3-base",
+  "max_len": 256,
+  "lr": 2e-05,
+  "epochs": 2,
+  "batch": 16,
+  "seed": 1,
+  "label_smoothing": 0.05,
+  "history": [
+    {
+      "epoch": 1,
+      "train_loss": 0.25332849398718116,
+      "val_PR-AUC@1:99": 0.9754868529377156,
+      "val_PR-AUC": 0.9987162034997843
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.13724179908355572,
+      "val_PR-AUC@1:99": 0.9575261620646932,
+      "val_PR-AUC": 0.9978347149934583
+    }
+  ],
+  "train_rows": 5146,
+  "quick": false
+}

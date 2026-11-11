@@ -1,0 +1,8 @@
+{
+  "tau_allow": 0.020120492992668482,
+  "tau_block": 0.04998601227651269,
+  "fpr_at_block": 0.005,
+  "fnr_at_allow": 0.01,
+  "val_split": "val",
+  "note": "qhat (split-conformal) not computed in the pilot"
+}
