@@ -9,7 +9,7 @@ from typing import Optional, Sequence
 
 import numpy as np
 
-from sentinel_l2.models.bundle import Bundle
+from .bundle import Bundle
 
 
 def window_starts(n_ids: int, window: int, stride: int) -> list[int]:

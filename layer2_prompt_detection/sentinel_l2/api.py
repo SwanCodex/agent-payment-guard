@@ -1,65 +1,66 @@
-"""Layer 2 entrypoint required by the contract: run_l2(L2In) -> LayerOut."""
+"""Layer 2 entrypoint: run_l2(L2In) -> LayerOut, written against the repo's contracts/sentinel_contracts.
+
+Install the contracts first (from the repo root):  pip install -e contracts
+
+Mapping onto the contract's LayerOut:
+    score        calibrated probability p in [0, 1] (rare-attack prior, see model card)
+    verdict      BLOCK if p >= tau_block; ALLOW if p <= tau_allow; the band in between becomes STEP_UP
+    reason_codes ["L2:INJECTION_HIGH"] or ["L2:INJECTION_UNCERTAIN"]; ["SYSTEM:MODEL_UNAVAILABLE"] on failure
+    metadata     zone ("ALLOW" | "GRAY" | "BLOCK"), z, p, thresholds, evidence spans, model versions.
+                 The decision engine should read metadata["zone"]: GRAY is an LLM Arbiter candidate, not a human step-up.
+Failures fail closed (STEP_UP), as the handbook requires; run_l2 never raises.
+"""
 from __future__ import annotations
 
+import logging
 import time
-from typing import Optional
 
-try:                                    # the team's contract package (the original stub imported from the package root)
-    from sentinel_contracts import L2In, LayerOut  # type: ignore
-except ImportError:                     # handbook section 5.1 mirror, used when sentinel_contracts is not installed
-    from sentinel_l2._contracts_fallback import L2In, LayerOut
+try:
+    from sentinel_contracts import L2In, LayerOut, Verdict
+except ImportError as exc:                                   # pragma: no cover
+    raise ImportError("sentinel_contracts is not installed. From the repo root run: pip install -e contracts") from exc
 
-from sentinel_l2.calibration import calibrated, verdict_from_p
-from sentinel_l2.evidence import top_spans
-from sentinel_l2.models.bundle import Bundle, load_bundle
-from sentinel_l2.models.scorer import TorchScorer
+from .scoring import configure, reset, score_text   # noqa: F401  (configure/reset re-exported for tests)
 
-_runtime: dict = {}
+log = logging.getLogger(__name__)
 
-
-def configure(bundle: Optional[Bundle] = None, scorer=None) -> None:
-    """Install a bundle and/or scorer explicitly (used by tests and by services that preload at startup)."""
-    if bundle is not None:
-        _runtime["bundle"] = bundle
-    if scorer is not None:
-        _runtime["scorer"] = scorer
-
-
-def reset() -> None:
-    _runtime.clear()
-
-
-def _get_runtime():
-    if "bundle" not in _runtime:
-        _runtime["bundle"] = load_bundle()
-    if "scorer" not in _runtime:
-        _runtime["scorer"] = TorchScorer(_runtime["bundle"])
-    return _runtime["bundle"], _runtime["scorer"]
+MODEL_NAME = "deberta-v3-base-injection"
+_VERDICT = {"ALLOW": Verdict.ALLOW, "GRAY": Verdict.STEP_UP, "BLOCK": Verdict.BLOCK}
+_REASONS = {"ALLOW": [], "GRAY": ["L2:INJECTION_UNCERTAIN"], "BLOCK": ["L2:INJECTION_HIGH"]}
 
 
 def run_l2(request: L2In) -> LayerOut:
-    """Score one untrusted text chunk. Raises on model or bundle errors; the router must map errors to STEP_UP."""
     t0 = time.perf_counter()
-    bundle, scorer = _get_runtime()
-    text = request.text or ""
+    source_type = (request.payload or {}).get("source_type")
+    try:
+        res = score_text(request.prompt or "")
+    except Exception as exc:                                 # fail closed: an unscored chunk goes to a human
+        log.exception("L2 scoring failed; returning STEP_UP")
+        return LayerOut(
+            layer="L2", score=0.5, verdict=Verdict.STEP_UP, reason_codes=["SYSTEM:MODEL_UNAVAILABLE"],
+            model_name=MODEL_NAME, model_version=None,
+            latency_ms=(time.perf_counter() - t0) * 1000,
+            metadata={"zone": "ERROR", "error": f"{type(exc).__name__}: {exc}"[:300], "source_type": source_type},
+        )
 
-    if not text.strip():
-        return LayerOut(layer="L2", p=0.0, abstain=False, flags=[],
-                        evidence=[{"kind": "note", "note": "empty text"}],
-                        model_versions=bundle.versions, latency_ms=(time.perf_counter() - t0) * 1000)
-
-    z = float(scorer.score([text])[0])
-    p = min(1.0, max(0.0, float(calibrated(z, bundle.T, bundle.delta))))
-    verdict = verdict_from_p(p, bundle.tau_block, bundle.tau_allow)
-
-    evidence = [{"kind": "score", "z": round(z, 3), "p": p, "verdict": verdict,
-                 "tau_block": bundle.tau_block, "tau_allow": bundle.tau_allow}]
-    if verdict != "ALLOW":              # spans cost extra forward passes, so only when someone will look at them
-        evidence += top_spans(text, scorer, z)
-
+    reasons = list(_REASONS[res.zone]) + (["L2:EMPTY_PROMPT"] if res.empty else [])
     return LayerOut(
-        layer="L2", p=p,
-        abstain=False,                  # TODO: split-conformal abstention once qhat is in thresholds.json
-        flags=[], evidence=evidence, model_versions=bundle.versions,
+        layer="L2", score=res.p, verdict=_VERDICT[res.zone], reason_codes=reasons,
+        model_name=MODEL_NAME, model_version=res.versions.get("l2_deberta"),
         latency_ms=(time.perf_counter() - t0) * 1000,
+        metadata={
+            "zone": res.zone, "z": None if res.empty else round(res.z, 3), "p": res.p,
+            "tau_block": res.tau_block, "tau_allow": res.tau_allow, "abstain": False,
+            "evidence": res.evidence, "model_versions": res.versions, "source_type": source_type,
+        },
     )
+
+
+def warmup() -> float:
+    """Load the bundle and run one dummy inference so the first real request is not slow. Returns seconds taken.
+
+    Call it once at service start (for example in a FastAPI lifespan or startup hook).
+    """
+    t0 = time.perf_counter()
+    score_text("warm-up text for the first inference")
+    return time.perf_counter() - t0

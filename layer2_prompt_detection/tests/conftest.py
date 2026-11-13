@@ -1,20 +1,8 @@
-import numpy as np
 import pytest
 
-from sentinel_l2 import api
+from l2_fakes import FakeScorer
+from sentinel_l2 import scoring
 from sentinel_l2.models.bundle import Bundle
-
-
-class FakeScorer:
-    """z = +4 if the text contains an attack phrase, else -4. Counts calls so tests can check cost."""
-    PHRASES = ("ignore all previous", "system note", "forward the customer")
-
-    def __init__(self):
-        self.calls = 0
-
-    def score(self, texts):
-        self.calls += 1
-        return np.array([4.0 if any(p in t.lower() for p in self.PHRASES) else -4.0 for t in texts])
 
 
 @pytest.fixture
@@ -25,8 +13,8 @@ def bundle():
 
 @pytest.fixture
 def fake(bundle):
-    api.reset()
+    scoring.reset()
     scorer = FakeScorer()
-    api.configure(bundle=bundle, scorer=scorer)
+    scoring.configure(bundle=bundle, scorer=scorer)
     yield scorer
-    api.reset()
+    scoring.reset()

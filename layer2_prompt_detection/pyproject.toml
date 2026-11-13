@@ -5,14 +5,12 @@ description = "SENTINEL Layer 2: malicious prompt (instruction-in-data) detector
 requires-python = ">=3.10"
 dependencies = [
     "numpy",
-    "pydantic>=2",
     "torch",
     "transformers>=4.40",
     "sentencepiece",
     "protobuf",
 ]
-# The handbook says layers depend on sentinel_contracts only. Until contracts/ is frozen and installable,
-# sentinel_l2/_contracts_fallback.py mirrors the handbook schemas (section 5.1).
+# Layers depend on sentinel_contracts only. Install it first, from the repo root:  pip install -e contracts
 
 [project.optional-dependencies]
 dev = ["pytest"]
@@ -20,6 +18,7 @@ dev = ["pytest"]
 [tool.pytest.ini_options]
 pythonpath = ["."]
 testpaths = ["tests"]
+addopts = "-s"
 
 [tool.setuptools.packages.find]
 include = ["sentinel_l2*"]
