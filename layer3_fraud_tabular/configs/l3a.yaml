@@ -1,0 +1,33 @@
+# Fixed settings of the Layer 3A pipeline (seeds, split, tuned parameters, policy).
+data:
+  dataset: IEEE-CIS Fraud Detection (train_transaction + train_identity)
+  split_fractions: {train: 0.70, val1: 0.10, val2: 0.10, test: 0.10}
+  split_rule: sort by TransactionDT then TransactionID; rows with the same TransactionDT never straddle a boundary
+
+model:
+  type: lightgbm
+  seeds: [11, 22, 33, 44, 55]
+  learning_rate: 0.05
+  n_estimators_max: 3000
+  early_stopping_rounds: 100
+  tuned_params:
+    num_leaves: 56
+    min_child_samples: 162
+    colsample_bytree: 0.5998368910791798
+    subsample: 0.7571172192068059
+    reg_alpha: 0.23423849847112907
+    reg_lambda: 0.0015339162591163618
+    scale_pos_weight: 1
+
+features:
+  dropped_for_serving: [browser, os, browser_freq, os_freq, card_distinct_addr]
+  has_identity_live_rule: device type is known
+
+calibration:
+  method: temperature
+  fitted_on: val1
+
+policy:
+  review_cost_c: 0.05
+  block_cost_b: 0.3
+  rule: ALLOW if p < c; BLOCK if p >= max(1 - c/b, b/(1 + b)); otherwise REVIEW

@@ -1,0 +1,9 @@
+{
+  "num_leaves": 56,
+  "min_child_samples": 162,
+  "colsample_bytree": 0.5998368910791798,
+  "subsample": 0.7571172192068059,
+  "reg_alpha": 0.23423849847112907,
+  "reg_lambda": 0.0015339162591163618,
+  "scale_pos_weight": 1
+}

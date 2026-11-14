@@ -1,0 +1,4 @@
+model,PR-AUC val1,PR-AUC val2,recall@1%FPR val1,recall@1%FPR val2
+"LightGBM tuned, 5 seeds",0.411,0.2892,0.3396,0.2577
+"XGBoost, 5 seeds",0.4112,0.2793,0.3406,0.2582
+LightGBM + XGBoost average,0.4144,0.2874,0.3459,0.2604

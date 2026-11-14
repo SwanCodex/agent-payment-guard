@@ -1,0 +1,13 @@
+,value
+rows,59054.0
+fraud rate,0.03747
+PR-AUC,0.29416
+ROC-AUC,0.83559
+recall@0.1%FPR,0.08089
+recall@0.5%FPR,0.16765
+recall@1%FPR,0.23091
+precision@top 0.5%,0.71959
+precision@top 1%,0.58883
+precision@top 2%,0.45601
+ECE (15 equal-mass bins),0.00288
+mean predicted,0.03502
