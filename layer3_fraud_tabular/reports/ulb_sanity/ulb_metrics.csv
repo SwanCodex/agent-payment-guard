@@ -1,0 +1,7 @@
+split,model,PR-AUC,ROC-AUC,recall@0.1%FPR,recall@1%FPR,ECE,mean p,fraud rows
+val2,logistic regression,0.83109,0.98221,0.79245,0.90566,0.00034,0.00197,53
+val2,LightGBM 5 seeds (raw),0.83272,0.98483,0.81132,0.88679,0.00128,0.00314,53
+val2,LightGBM 5 seeds (temperature calibrated),0.83272,0.98483,0.81132,0.88679,0.00034,0.00181,53
+test,logistic regression,0.45305,0.95919,0.59091,0.77273,0.00067,0.00141,22
+test,LightGBM 5 seeds (raw),0.70135,0.98366,0.72727,0.72727,0.00172,0.00248,22
+test,LightGBM 5 seeds (temperature calibrated),0.70135,0.98366,0.72727,0.72727,0.00055,0.00114,22

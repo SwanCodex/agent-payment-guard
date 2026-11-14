@@ -37,6 +37,8 @@ make test
 ```
 
 ## Not done / known gaps
-- ULB credit-card sanity check (handbook 8.2, secondary check) is not included.
-- `validate_artifacts.py` (contracts/) has not been run against the bundle yet.
+- `validate_artifacts.py` (contracts/) is owned by P4 and is pending. `tests/test_artifact_bundle.py` checks the same things in the meantime.
 - The L3 blender with the graph model is not part of this folder (orchestration/decision).
+- The ULB sanity check is done: see `reports/ulb_sanity/`.
+
+
