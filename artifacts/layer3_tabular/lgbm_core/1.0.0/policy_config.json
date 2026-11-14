@@ -1,0 +1,8 @@
+{
+  "review_cost_c": 0.05,
+  "block_cost_b": 0.3,
+  "allow_if_p_below": 0.05,
+  "block_if_p_at_least": 0.8333333333333333,
+  "calibration_T": 1.0679606615048276,
+  "probabilities_used": "temperature-calibrated p_cal"
+}

@@ -1,0 +1,3 @@
+feature set,PR-AUC val1,PR-AUC val2,recall@1%FPR val1,recall@1%FPR val2,gray share val2
+Core (deployable),0.411,0.2892,0.3396,0.2577,0.8575
+Full (offline ceiling),0.6663,0.5228,0.59,0.4554,0.7243

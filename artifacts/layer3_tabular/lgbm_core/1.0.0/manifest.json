@@ -1,0 +1,48 @@
+{
+  "model": "lgbm_core",
+  "version": "1.0.0",
+  "layer": "L3A",
+  "seeds": [
+    11,
+    22,
+    33,
+    44,
+    55
+  ],
+  "split_seed_note": "time split, no randomness",
+  "trained_on": "Kaggle notebooks",
+  "git_sha": "fill in after the commit (git rev-parse HEAD)",
+  "data_manifest_sha256": "b5c3fce85b90c3fef964f4a28a9825a94e53e3be810fd3bad7a39ea874ab713d",
+  "package_versions": {
+    "numpy": "2.1.3",
+    "pandas": "2.3.3",
+    "scipy": "1.16.3",
+    "scikit-learn": "1.6.1",
+    "lightgbm": "4.6.0",
+    "xgboost": "3.4.1",
+    "catboost": "1.2.10",
+    "optuna": "5.0.0",
+    "pyyaml": "6.0.3",
+    "matplotlib": "3.10.0",
+    "pyarrow": "23.0.1"
+  },
+  "python": "3.13.18",
+  "files": {
+    "calibration.json": "3b3fa5e769cf9f30e92546496cb5c6cf37291b185befd238358a0b0785e10fd3",
+    "eval_report.md": "d766b7c8b87bf2946f97bf6bd6b6f39dc9b9f76d8e94623f0523fd0833af26a7",
+    "feature_order.json": "ff60d04720eb60e4cd5320f92e8a0e687be2a50abc311d45c118cfed9093eeeb",
+    "feature_spec.yaml": "49290105102deb2475471006f7e77e2138a6fc36545081014beafddf82556011",
+    "frequency_maps.json": "55ef39726d30f8d7aa5dc4e01b878fe348d444b033ccb76c90499f0fb0eb7d85",
+    "lgbm_seed11.txt": "41ea09cf8fe8fc80ac0aae984cbe0ba6a4be0fff72f1b1b0d5be3a4ba86a686f",
+    "lgbm_seed22.txt": "192466f1dd03d41ceaa2da835d2976eba11f6dafbadc1a66b8ab7bd0226da58a",
+    "lgbm_seed33.txt": "8df894a1f0e18b09309715bebb7c3010609bf82938a461ca39eed42d5f3ac150",
+    "lgbm_seed44.txt": "e8925147fc371813684ea3551f4497170d9c68e60fcf45c7bb895ae56977aa50",
+    "lgbm_seed55.txt": "21aaff6fe1e818e4a207d94bd88571d8f4797ca2ce21d192bd06bb32c5f2b2eb",
+    "model_card.md": "4d937c6b129261570477a18d2f3bde52387caefd22044ae59501e3e97407458f",
+    "policy_config.json": "02346c0ec0c5b202d72cd53800a4cb557d88ebcd23f617911456bd8d2a910ab0",
+    "preds_lgbm_core_test.parquet": "1a226be0aefb8753b4d8e6dccf2eb465af4c7e501d2734d6cec90559968fc99c",
+    "preds_lgbm_core_val1.parquet": "0c978c2128fa5437f75450a30823a8c15c10830b09580f1c54e1c65bb43056ca",
+    "preds_lgbm_core_val2.parquet": "902e27048d3694b602a8e90ca52eecf1079c15eb2af108627381197047488211",
+    "thresholds.json": "974bbd85711e6b2dcf5539551f8ac2e86364d351b9f8573585eb6d13e5f34e40"
+  }
+}
