@@ -1,5 +1,6 @@
 """Serving scorer for the Layer 1 URL ensemble. Loads an artifact bundle
 (artifacts/layer1/url_ensemble/<version>) produced by scripts/train_final_l1.py."""
+import hashlib
 import json
 import math
 import os
@@ -8,6 +9,7 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 import numpy as np
+import yaml
 from sklearn.feature_extraction.text import HashingVectorizer
 
 from ..features.builder import LEXICAL_USED
@@ -22,6 +24,19 @@ GBM_FEATURES: List[str] = [f for f in LEXICAL_USED + LEXICON_FEATURES + ["tld_ri
                            if f not in _HOST and f != "is_shortener"]
 
 _LOGIT_CLIP = 1e-6
+
+
+class IntegrityError(ValueError):
+    """Raised when bundle files fail hash verification or schema order checks."""
+    pass
+
+
+def _sha256(path: Path) -> str:
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
 
 
 def strip_scheme(u: str) -> str:
@@ -73,9 +88,39 @@ class UrlEnsemble:
     def __init__(self, art_dir):
         import lightgbm as lgb
         d = Path(art_dir)
-        self.version = d.name
+        manifest_path = d / "manifest.json"
+        if not manifest_path.exists():
+            raise IntegrityError("integrity_mismatch: manifest.json")
+        try:
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        except Exception:
+            raise IntegrityError("integrity_mismatch: manifest.json")
+
+        self.version = manifest.get("version", d.name)
+
+        # Verify file hashes from manifest
+        files = manifest.get("files", {})
+        for fname, exp_hash in files.items():
+            fpath = d / fname
+            if not fpath.exists():
+                raise IntegrityError(f"integrity_mismatch: {fname}")
+            if _sha256(fpath) != exp_hash:
+                raise IntegrityError(f"integrity_mismatch: {fname}")
+
+        # Verify feature_spec.yaml feature order matches LightGBM feature names
+        spec_path = d / "feature_spec.yaml"
+        if not spec_path.exists():
+            raise IntegrityError("integrity_mismatch: feature_spec.yaml")
+        try:
+            spec = yaml.safe_load(spec_path.read_text(encoding="utf-8"))
+            spec_features = [f["name"] for f in spec.get("features", [])]
+        except Exception:
+            raise IntegrityError("integrity_mismatch: feature_spec.yaml")
+
         self.lr = LRScorer(d / "lr_ngram.npz")
         self.booster = lgb.Booster(model_file=str(d / "model.txt"))
+        if self.booster.feature_name() != spec_features:
+            raise IntegrityError("integrity_mismatch: feature_spec.yaml")
         if self.booster.num_feature() != len(GBM_FEATURES):
             raise ValueError(f"LightGBM expects {self.booster.num_feature()} features, "
                              f"serving builds {len(GBM_FEATURES)}")
