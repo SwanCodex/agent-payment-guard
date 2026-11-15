@@ -11,7 +11,7 @@ from sentinel_contracts import (
 
 from layer1_heuristics.sentinel_l1.api import run_l1
 from layer2_prompt_detection.sentinel_l2.api import run_l2
-from layer3_fraud_tabular.sentinel_l3a.api import run_l3a
+from orchestration.integrations.l3a import run_l3a
 from layer3_fraud_graph.sentinel_l3b.api import run_l3b
 
 from orchestration.decision.engine import build_response

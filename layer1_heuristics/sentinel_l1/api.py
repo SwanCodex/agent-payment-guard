@@ -52,8 +52,21 @@ def run_l1(request: L1In) -> LayerOut:
                 meta["url_model"] = f"error: {e!r}"
                 p = None
 
-    block = any(f.severity == "block" for f in flags) or (p is not None and p >= model.tau_block)
-    step_up = any(f.severity == "step_up" for f in flags)
+    block = any(f.severity == "block" for f in flags) or (
+        p is not None and p >= model.tau_block
+    )
+
+    url_step_up = (
+        p is not None and (
+            p > model.tau_allow or
+            meta.get("url_model", {}).get("abstain", False)
+        )
+    )
+
+    step_up = (
+        any(f.severity == "step_up" for f in flags)
+        or url_step_up
+    )
     verdict = Verdict.BLOCK if block else (Verdict.STEP_UP if step_up else Verdict.ALLOW)
     flag_score = max((_FLAG_SCORE[f.severity] for f in flags), default=0.0)
     score = max(flag_score, p) if p is not None else flag_score
