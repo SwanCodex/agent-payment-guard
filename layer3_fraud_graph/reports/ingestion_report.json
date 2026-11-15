@@ -1,0 +1,26 @@
+{
+  "train": {
+    "split": "train",
+    "transaction_rows": 590540,
+    "identity_rows": 144233,
+    "merged_rows": 590540,
+    "identity_matches": 144233,
+    "transactions_without_identity": 446307,
+    "has_identity_coverage": 0.2442391709283029,
+    "columns": 435,
+    "output": "data\\interim\\train_merged.parquet",
+    "output_size_bytes": 84811010
+  },
+  "test": {
+    "split": "test",
+    "transaction_rows": 506691,
+    "identity_rows": 141907,
+    "merged_rows": 506691,
+    "identity_matches": 141907,
+    "transactions_without_identity": 364784,
+    "has_identity_coverage": 0.28006615471756946,
+    "columns": 434,
+    "output": "data\\interim\\test_merged.parquet",
+    "output_size_bytes": 73749897
+  }
+}
