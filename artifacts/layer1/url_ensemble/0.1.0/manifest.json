@@ -1,0 +1,36 @@
+{
+  "model": "url_ensemble",
+  "version": "0.1.0",
+  "created": "2026-11-15",
+  "git_sha": "eda414d8a79b90db3f73abb935a33a8585fa5e5e",
+  "git_dirty": true,
+  "seed": 42,
+  "python": "3.13.15",
+  "packages": {
+    "scikit-learn": "1.9.1",
+    "lightgbm": "4.7.0",
+    "numpy": "2.5.4",
+    "pandas": "3.1.1",
+    "scipy": "1.18.1",
+    "tldextract": "5.4.0"
+  },
+  "data_manifest_sha256": "3a956c6875780227eff67932e0cabeb2288bd6956d50eb471ab88a308afa58e0",
+  "training_scripts": [
+    "scripts/build_url_dataset.py",
+    "scripts/collect_cc_urls.py",
+    "scripts/eda_url.py",
+    "scripts/train_final_l1.py"
+  ],
+  "files": {
+    "brands.json": "db62516f346e7e6e6c476a7559b6a7ae64c6c50c9f08f2879e60dc95dcce6c54",
+    "calibration.json": "f0ed2219398d87431a4e90b262216f8b471d99f4ef11372c12a6e6751c748cbb",
+    "combiner.json": "20e42601592f54bfab6b17324a6e92a96c0ef04d05a378483a7e5a6f75e9d081",
+    "eval_report.md": "e6f26387edd11b2bf3abecd5bc0d91b7f3ef6a4a69ed864d2fd030779a96bb9e",
+    "feature_spec.yaml": "82bd97cdc430e89c835b9c9a2d80f3ed051ed0f6853b416e7a9ec54e918f13d0",
+    "lr_ngram.npz": "7f670671da5318381503d79a9e9652910fbb1761434e1583040bc4539a4fee0b",
+    "model.txt": "f320e399ab581ec66972d95637f58b0b30df118aa4b007f5e8f164824695b8c2",
+    "model_card.md": "db5e2b725b72ede55644ed8157e4af1edfcfe193774442e470e0bf0ff7ad1396",
+    "thresholds.json": "02a5e13a70f909f880f3cb0b9c240f816f0ba89bea6e4d56ea8574842815232a",
+    "tld_risk.json": "5aa6fef20ab194e261710182145706f4f310589b7338c449db99ea041309d158"
+  }
+}
