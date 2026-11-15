@@ -1,0 +1,144 @@
+{
+  "card": {
+    "columns": [
+      "card1",
+      "card2",
+      "card3",
+      "card5",
+      "addr1",
+      "addr2"
+    ],
+    "transactions_with_any_component": 590540,
+    "transactions_with_all_components": 514655,
+    "transactions_with_partial_identity": 75885,
+    "unique_complete_entities": 38197,
+    "singleton_entities": 15086,
+    "entities_with_multiple_transactions": 23111,
+    "transactions_in_repeated_entities": 499569,
+    "degree_quantiles": {
+      "0.5": 2.0,
+      "0.9": 22.0,
+      "0.95": 43.0,
+      "0.99": 187.04000000000087,
+      "0.999": 944.4119999999893
+    },
+    "maximum_degree": 5862,
+    "top_10_entity_degrees": [
+      5862,
+      5766,
+      4647,
+      3538,
+      3523,
+      3419,
+      2715,
+      2548,
+      2320,
+      2287
+    ]
+  },
+  "address": {
+    "columns": [
+      "addr1",
+      "addr2"
+    ],
+    "transactions_with_any_component": 524834,
+    "transactions_with_all_components": 524834,
+    "transactions_with_partial_identity": 0,
+    "unique_complete_entities": 437,
+    "singleton_entities": 171,
+    "entities_with_multiple_transactions": 266,
+    "transactions_in_repeated_entities": 524663,
+    "degree_quantiles": {
+      "0.5": 2.0,
+      "0.9": 1588.0000000000014,
+      "0.95": 7649.999999999997,
+      "0.99": 25129.479999999956,
+      "0.999": 44764.864000000074
+    },
+    "maximum_degree": 46324,
+    "top_10_entity_degrees": [
+      46324,
+      42748,
+      42018,
+      39870,
+      26284,
+      23077,
+      20825,
+      20140,
+      16102,
+      15236
+    ]
+  },
+  "device": {
+    "columns": [
+      "DeviceInfo",
+      "id_30",
+      "id_31"
+    ],
+    "transactions_with_any_component": 140589,
+    "transactions_with_all_components": 75306,
+    "transactions_with_partial_identity": 65283,
+    "unique_complete_entities": 2068,
+    "singleton_entities": 899,
+    "entities_with_multiple_transactions": 1169,
+    "transactions_in_repeated_entities": 74407,
+    "degree_quantiles": {
+      "0.5": 2.0,
+      "0.9": 24.299999999999955,
+      "0.95": 88.64999999999986,
+      "0.99": 887.6999999999935,
+      "0.999": 3577.66
+    },
+    "maximum_degree": 5822,
+    "top_10_entity_degrees": [
+      5822,
+      3668,
+      3579,
+      3559,
+      3050,
+      2996,
+      1902,
+      1495,
+      1400,
+      1396
+    ]
+  },
+  "email_domain": {
+    "columns": [
+      "P_emaildomain"
+    ],
+    "transactions_with_any_component": 496084,
+    "transactions_with_all_components": 496084,
+    "transactions_with_partial_identity": 0,
+    "unique_complete_entities": 59,
+    "singleton_entities": 0,
+    "entities_with_multiple_transactions": 59,
+    "transactions_in_repeated_entities": 496084,
+    "degree_quantiles": {
+      "0.5": 305.0,
+      "0.9": 6591.200000000004,
+      "0.95": 37823.19999999995,
+      "0.99": 154450.8200000002,
+      "0.999": 220964.58200000002
+    },
+    "maximum_degree": 228355,
+    "top_10_entity_degrees": [
+      228355,
+      100934,
+      45250,
+      36998,
+      28289,
+      7888,
+      6267,
+      5096,
+      4092,
+      4033
+    ]
+  },
+  "temporal": {
+    "unique_timestamps": 573349,
+    "transactions_in_tied_timestamps": 33932,
+    "number_of_tied_timestamp_groups": 16741,
+    "maximum_transactions_at_same_timestamp": 8
+  }
+}
