@@ -1,0 +1,155 @@
+# Feature spec for the LightGBM part of url_ensemble 0.1.0.
+# The LR part uses hashed char 2-5-grams of the URL (scheme and www. removed); see model_card.md.
+model: url_ensemble
+version: 0.1.0
+features:
+  - name: url_len
+    definition: "length of the URL string after scheme normalisation"
+    window: none
+    source_columns: [url]
+    dtype: float
+    serving_available: true
+  - name: path_len
+    definition: "length of the URL path (at least 1: a bare host has path /)"
+    window: none
+    source_columns: [url]
+    dtype: float
+    serving_available: true
+  - name: query_len
+    definition: "length of the query string"
+    window: none
+    source_columns: [url]
+    dtype: float
+    serving_available: true
+  - name: n_dots
+    definition: "number of dots in the URL"
+    window: none
+    source_columns: [url]
+    dtype: float
+    serving_available: true
+  - name: n_hyphens
+    definition: "number of hyphens in the URL"
+    window: none
+    source_columns: [url]
+    dtype: float
+    serving_available: true
+  - name: n_digits
+    definition: "number of digit characters in the URL"
+    window: none
+    source_columns: [url]
+    dtype: float
+    serving_available: true
+  - name: n_special
+    definition: "count of the characters @ ? & = _ % ~ $ ! * + , ;"
+    window: none
+    source_columns: [url]
+    dtype: float
+    serving_available: true
+  - name: digit_ratio
+    definition: "digits divided by URL length"
+    window: none
+    source_columns: [url]
+    dtype: float
+    serving_available: true
+  - name: entropy_path
+    definition: "Shannon entropy (bits) of the path string"
+    window: none
+    source_columns: [url]
+    dtype: float
+    serving_available: true
+  - name: longest_token
+    definition: "length of the longest alphanumeric run in the URL"
+    window: none
+    source_columns: [url]
+    dtype: float
+    serving_available: true
+  - name: hex_ratio_pathquery
+    definition: "share of hex characters among alphanumerics in path plus query"
+    window: none
+    source_columns: [url]
+    dtype: float
+    serving_available: true
+  - name: path_depth
+    definition: "number of non-empty path segments"
+    window: none
+    source_columns: [url]
+    dtype: float
+    serving_available: true
+  - name: n_query_params
+    definition: "number of &-separated query parameters"
+    window: none
+    source_columns: [url]
+    dtype: float
+    serving_available: true
+  - name: has_at
+    definition: "1 if the URL contains @"
+    window: none
+    source_columns: [url]
+    dtype: float
+    serving_available: true
+  - name: has_port
+    definition: "1 if the URL has an explicit port"
+    window: none
+    source_columns: [url]
+    dtype: float
+    serving_available: true
+  - name: is_ip_host
+    definition: "1 if the host is an IP address"
+    window: none
+    source_columns: [url]
+    dtype: float
+    serving_available: true
+  - name: has_punycode
+    definition: "1 if any host label starts with xn--"
+    window: none
+    source_columns: [url]
+    dtype: float
+    serving_available: true
+  - name: is_homepage
+    definition: "1 if the path is / and there is no query"
+    window: none
+    source_columns: [url]
+    dtype: float
+    serving_available: true
+  - name: double_slash_in_path
+    definition: "1 if the path contains //"
+    window: none
+    source_columns: [url]
+    dtype: float
+    serving_available: true
+  - name: n_risky_host
+    definition: "count of login/verify/secure/update/account/wallet/invoice/pay in the host"
+    window: none
+    source_columns: [url]
+    dtype: float
+    serving_available: true
+  - name: n_risky_path
+    definition: "count of the same words in path plus query"
+    window: none
+    source_columns: [url]
+    dtype: float
+    serving_available: true
+  - name: brand_in_subdomain
+    definition: "distinct Tranco top-500 brand labels found in the subdomain part, excluding the site own label"
+    window: none
+    source_columns: [url]
+    dtype: float
+    serving_available: true
+  - name: brand_in_path
+    definition: "distinct brand labels found in path plus query, excluding the site own label"
+    window: none
+    source_columns: [url]
+    dtype: float
+    serving_available: true
+  - name: brand_in_domain_label
+    definition: "distinct brand labels contained in, but not equal to, the registered-domain label"
+    window: none
+    source_columns: [url]
+    dtype: float
+    serving_available: true
+  - name: tld_risk
+    definition: "smoothed malicious rate of the public suffix; fit on train only (out-of-fold for training rows); unseen suffix gets the prior"
+    window: none
+    source_columns: [url]
+    dtype: float
+    serving_available: true
