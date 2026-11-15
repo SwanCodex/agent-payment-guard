@@ -1,0 +1,6 @@
+version,PR-AUC val2,recall@1%FPR val2,PR-AUC change
+as trained (all 48 features),0.2892,0.2577,0.0
+browser and os not available,0.2737,0.2388,-0.0155
+card_distinct_addr not available,0.2681,0.2253,-0.0211
+has_identity taken from device type,0.2892,0.2577,-0.0
+all three changes together,0.2532,0.2112,-0.036

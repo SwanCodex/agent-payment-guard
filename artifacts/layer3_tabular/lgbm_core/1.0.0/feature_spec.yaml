@@ -1,0 +1,417 @@
+log_amount:
+  definition: log(1 + TransactionAmt)
+  window: row
+  source_columns:
+  - TransactionAmt
+  serving_available: true
+  dtype: float64
+  used_in_model: true
+cents:
+  definition: decimal part of the amount
+  window: row
+  source_columns:
+  - TransactionAmt
+  serving_available: true
+  dtype: float64
+  used_in_model: true
+is_round_amount:
+  definition: 1 if the amount has no cents
+  window: row
+  source_columns:
+  - TransactionAmt
+  serving_available: true
+  dtype: int64
+  used_in_model: true
+hour:
+  definition: relative hour of day from TransactionDT (reference start unknown)
+  window: row
+  source_columns:
+  - TransactionDT
+  serving_available: true
+  dtype: int64
+  used_in_model: true
+dayofweek:
+  definition: relative day of week from TransactionDT
+  window: row
+  source_columns:
+  - TransactionDT
+  serving_available: true
+  dtype: int64
+  used_in_model: true
+addr1:
+  definition: billing address code 1
+  window: row
+  source_columns:
+  - addr1
+  serving_available: true
+  dtype: float64
+  used_in_model: true
+addr2:
+  definition: billing address code 2
+  window: row
+  source_columns:
+  - addr2
+  serving_available: true
+  dtype: float64
+  used_in_model: true
+dist1:
+  definition: distance feature as provided
+  window: row
+  source_columns:
+  - dist1
+  serving_available: true
+  dtype: float64
+  used_in_model: true
+has_identity:
+  definition: 1 if the device type is known (the live replacement for 'identity row
+    exists')
+  window: row
+  source_columns:
+  - identity table
+  serving_available: true
+  dtype: int64
+  used_in_model: true
+ProductCD:
+  definition: raw categorical ProductCD
+  window: row
+  source_columns:
+  - ProductCD
+  serving_available: true
+  dtype: object
+  used_in_model: true
+card4:
+  definition: raw categorical card4
+  window: row
+  source_columns:
+  - card4
+  serving_available: true
+  dtype: object
+  used_in_model: true
+card6:
+  definition: raw categorical card6
+  window: row
+  source_columns:
+  - card6
+  serving_available: true
+  dtype: object
+  used_in_model: true
+P_emaildomain:
+  definition: raw categorical P_emaildomain
+  window: row
+  source_columns:
+  - P_emaildomain
+  serving_available: true
+  dtype: object
+  used_in_model: true
+R_emaildomain:
+  definition: raw categorical R_emaildomain
+  window: row
+  source_columns:
+  - R_emaildomain
+  serving_available: true
+  dtype: object
+  used_in_model: true
+DeviceType:
+  definition: raw categorical DeviceType
+  window: row
+  source_columns:
+  - DeviceType
+  serving_available: true
+  dtype: object
+  used_in_model: true
+same_email_domain:
+  definition: 1 if payer and recipient email domains match
+  window: row
+  source_columns:
+  - P_emaildomain
+  - R_emaildomain
+  serving_available: true
+  dtype: int64
+  used_in_model: true
+browser:
+  definition: browser family from id_31, version numbers removed
+  window: row
+  source_columns:
+  - id_31
+  serving_available: false
+  dtype: object
+  used_in_model: false
+  note: 'development only: the live system does not provide this, so the shipping
+    model does not use it'
+os:
+  definition: OS family from id_30, version numbers removed
+  window: row
+  source_columns:
+  - id_30
+  serving_available: false
+  dtype: object
+  used_in_model: false
+  note: 'development only: the live system does not provide this, so the shipping
+    model does not use it'
+ProductCD_freq:
+  definition: share of train rows with this ProductCD (0 if unseen)
+  window: fit on train
+  source_columns:
+  - ProductCD
+  serving_available: true
+  dtype: float64
+  used_in_model: true
+card4_freq:
+  definition: share of train rows with this card4 (0 if unseen)
+  window: fit on train
+  source_columns:
+  - card4
+  serving_available: true
+  dtype: float64
+  used_in_model: true
+card6_freq:
+  definition: share of train rows with this card6 (0 if unseen)
+  window: fit on train
+  source_columns:
+  - card6
+  serving_available: true
+  dtype: float64
+  used_in_model: true
+P_emaildomain_freq:
+  definition: share of train rows with this P_emaildomain (0 if unseen)
+  window: fit on train
+  source_columns:
+  - P_emaildomain
+  serving_available: true
+  dtype: float64
+  used_in_model: true
+R_emaildomain_freq:
+  definition: share of train rows with this R_emaildomain (0 if unseen)
+  window: fit on train
+  source_columns:
+  - R_emaildomain
+  serving_available: true
+  dtype: float64
+  used_in_model: true
+DeviceType_freq:
+  definition: share of train rows with this DeviceType (0 if unseen)
+  window: fit on train
+  source_columns:
+  - DeviceType
+  serving_available: true
+  dtype: float64
+  used_in_model: true
+browser_freq:
+  definition: share of train rows with this browser family
+  window: fit on train
+  source_columns:
+  - id_31
+  serving_available: false
+  dtype: float64
+  used_in_model: false
+  note: 'development only: the live system does not provide this, so the shipping
+    model does not use it'
+os_freq:
+  definition: share of train rows with this OS family
+  window: fit on train
+  source_columns:
+  - id_30
+  serving_available: false
+  dtype: float64
+  used_in_model: false
+  note: 'development only: the live system does not provide this, so the shipping
+    model does not use it'
+card_cnt_1h:
+  definition: number of earlier transactions of this card
+  window: last 1h
+  source_columns:
+  - card_key
+  - TransactionDT
+  serving_available: true
+  dtype: float64
+  used_in_model: true
+card_cnt_24h:
+  definition: number of earlier transactions of this card
+  window: last 24h
+  source_columns:
+  - card_key
+  - TransactionDT
+  serving_available: true
+  dtype: float64
+  used_in_model: true
+card_cnt_7d:
+  definition: number of earlier transactions of this card
+  window: last 7d
+  source_columns:
+  - card_key
+  - TransactionDT
+  serving_available: true
+  dtype: float64
+  used_in_model: true
+card_amt_mean:
+  definition: mean amount of earlier transactions of this card
+  window: all history
+  source_columns:
+  - card_key
+  - TransactionAmt
+  serving_available: true
+  dtype: float64
+  used_in_model: true
+card_secs_since_last:
+  definition: seconds since this card's previous transaction
+  window: all history
+  source_columns:
+  - card_key
+  - TransactionDT
+  serving_available: true
+  dtype: float64
+  used_in_model: true
+addr_cnt_1h:
+  definition: number of earlier transactions of this addr
+  window: last 1h
+  source_columns:
+  - addr_key
+  - TransactionDT
+  serving_available: true
+  dtype: float64
+  used_in_model: true
+addr_cnt_24h:
+  definition: number of earlier transactions of this addr
+  window: last 24h
+  source_columns:
+  - addr_key
+  - TransactionDT
+  serving_available: true
+  dtype: float64
+  used_in_model: true
+addr_cnt_7d:
+  definition: number of earlier transactions of this addr
+  window: last 7d
+  source_columns:
+  - addr_key
+  - TransactionDT
+  serving_available: true
+  dtype: float64
+  used_in_model: true
+addr_amt_mean:
+  definition: mean amount of earlier transactions of this addr
+  window: all history
+  source_columns:
+  - addr_key
+  - TransactionAmt
+  serving_available: true
+  dtype: float64
+  used_in_model: true
+addr_secs_since_last:
+  definition: seconds since this addr's previous transaction
+  window: all history
+  source_columns:
+  - addr_key
+  - TransactionDT
+  serving_available: true
+  dtype: float64
+  used_in_model: true
+dev_cnt_1h:
+  definition: number of earlier transactions of this dev
+  window: last 1h
+  source_columns:
+  - device_key
+  - TransactionDT
+  serving_available: true
+  dtype: float64
+  used_in_model: true
+dev_cnt_24h:
+  definition: number of earlier transactions of this dev
+  window: last 24h
+  source_columns:
+  - device_key
+  - TransactionDT
+  serving_available: true
+  dtype: float64
+  used_in_model: true
+dev_cnt_7d:
+  definition: number of earlier transactions of this dev
+  window: last 7d
+  source_columns:
+  - device_key
+  - TransactionDT
+  serving_available: true
+  dtype: float64
+  used_in_model: true
+dev_amt_mean:
+  definition: mean amount of earlier transactions of this dev
+  window: all history
+  source_columns:
+  - device_key
+  - TransactionAmt
+  serving_available: true
+  dtype: float64
+  used_in_model: true
+dev_secs_since_last:
+  definition: seconds since this dev's previous transaction
+  window: all history
+  source_columns:
+  - device_key
+  - TransactionDT
+  serving_available: true
+  dtype: float64
+  used_in_model: true
+card_cnt_all:
+  definition: number of all earlier transactions of this card
+  window: all history
+  source_columns:
+  - card_key
+  serving_available: true
+  dtype: float64
+  used_in_model: true
+card_first_seen:
+  definition: 1 if the card has no earlier transaction
+  window: all history
+  source_columns:
+  - card_key
+  serving_available: true
+  dtype: int64
+  used_in_model: true
+card_amt_std:
+  definition: std of amounts of earlier transactions of this card
+  window: all history
+  source_columns:
+  - card_key
+  - TransactionAmt
+  serving_available: true
+  dtype: float64
+  used_in_model: true
+card_amt_z:
+  definition: (amount - card mean) / card std; needs >= 3 earlier rows; clipped to
+    [-10, 10]
+  window: all history
+  source_columns:
+  - card_key
+  - TransactionAmt
+  serving_available: true
+  dtype: float64
+  used_in_model: true
+card_distinct_emails:
+  definition: distinct payer email domains seen earlier with this card
+  window: all history
+  source_columns:
+  - card_key
+  - P_emaildomain
+  serving_available: true
+  dtype: int64
+  used_in_model: true
+card_distinct_addr:
+  definition: distinct addresses seen earlier with this card (card key without address)
+  window: all history
+  source_columns:
+  - card_base_key
+  - addr_key
+  serving_available: false
+  dtype: int64
+  used_in_model: false
+  note: 'development only: the live system does not provide this, so the shipping
+    model does not use it'
+dev_distinct_cards:
+  definition: distinct cards seen earlier with this device key
+  window: all history
+  source_columns:
+  - device_key
+  - card_key
+  serving_available: true
+  dtype: float64
+  used_in_model: true

@@ -1,0 +1,95 @@
+{
+  "highest risk score": {
+    "risk_probability": 0.9698,
+    "actual_isFraud": 1,
+    "top5": [
+      {
+        "feature": "log_amount",
+        "value": 6.111467339502679,
+        "shap_logodds": 1.9897
+      },
+      {
+        "feature": "R_emaildomain",
+        "value": "gmail.com",
+        "shap_logodds": 1.3489
+      },
+      {
+        "feature": "dev_cnt_7d",
+        "value": 2.0,
+        "shap_logodds": 0.7315
+      },
+      {
+        "feature": "browser",
+        "value": "chrome generic",
+        "shap_logodds": 0.6257
+      },
+      {
+        "feature": "cents",
+        "value": 0.0,
+        "shap_logodds": 0.5288
+      }
+    ]
+  },
+  "middle": {
+    "risk_probability": 0.0122,
+    "actual_isFraud": 0,
+    "top5": [
+      {
+        "feature": "P_emaildomain",
+        "value": "anonymous.com",
+        "shap_logodds": -0.4321
+      },
+      {
+        "feature": "cents",
+        "value": 0.0,
+        "shap_logodds": 0.3368
+      },
+      {
+        "feature": "card_cnt_all",
+        "value": 628.0,
+        "shap_logodds": -0.171
+      },
+      {
+        "feature": "card_distinct_emails",
+        "value": 17.0,
+        "shap_logodds": -0.1356
+      },
+      {
+        "feature": "addr1",
+        "value": 204.0,
+        "shap_logodds": 0.1334
+      }
+    ]
+  },
+  "lowest risk score": {
+    "risk_probability": 0.0002,
+    "actual_isFraud": 0,
+    "top5": [
+      {
+        "feature": "P_emaildomain",
+        "value": "twc.com",
+        "shap_logodds": -2.2129
+      },
+      {
+        "feature": "cents",
+        "value": 0.95,
+        "shap_logodds": -0.5103
+      },
+      {
+        "feature": "log_amount",
+        "value": 3.4641721808235437,
+        "shap_logodds": -0.3945
+      },
+      {
+        "feature": "dist1",
+        "value": 5.0,
+        "shap_logodds": -0.2517
+      },
+      {
+        "feature": "card_distinct_addr",
+        "value": 2.0,
+        "shap_logodds": -0.2128
+      }
+    ]
+  }
+}

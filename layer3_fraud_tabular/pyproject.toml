@@ -1,0 +1,28 @@
+[project]
+name = "sentinel-l3a"
+version = "1.0.0"
+description = "SENTINEL Layer 3A: tabular transaction fraud model (LightGBM) and serving code"
+requires-python = ">=3.11"
+dependencies = [
+    "numpy",
+    "pandas",
+    "scipy",
+    "scikit-learn",
+    "lightgbm",
+    "pyyaml",
+]
+# The handbook says layers depend on sentinel_contracts only; add it here once contracts/ is frozen.
+
+[project.optional-dependencies]
+dev = ["pytest", "matplotlib", "xgboost", "catboost", "optuna", "pyarrow"]
+
+[tool.pytest.ini_options]
+pythonpath = [".", "tests"]
+testpaths = ["tests"]
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["sentinel_l3a*"]

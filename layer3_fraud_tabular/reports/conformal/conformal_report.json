@@ -1,0 +1,7 @@
+{
+  "alpha": 0.1,
+  "calibration_split": "val1",
+  "qhat_standard": 0.07249844074249268,
+  "q_legit": 0.05414765700697899,
+  "q_fraud": 0.984628957696259
+}

@@ -1,0 +1,15 @@
+id_31,train,test
+chrome 63.0,21816.0,
+mobile safari 11.0,11029.0,2046.0
+mobile safari generic,8009.0,
+ie 11.0 for desktop,7370.0,613.0
+safari generic,7208.0,
+chrome 62.0,7101.0,
+chrome 64.0,6462.0,
+chrome 63.0 for android,5620.0,
+chrome 66.0,,3547.0
+chrome 66.0 for android,,2035.0
+edge 16.0,,1311.0
+safari 11.0,,468.0
+firefox 60.0,,225.0
+chrome 65.0,,215.0

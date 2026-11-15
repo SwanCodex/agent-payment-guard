@@ -1,0 +1,8 @@
+model,PR-AUC,ROC-AUC,recall@1%FPR
+Logistic regression (baseline),0.1757,0.7802,0.1349
+LightGBM,0.4013,0.8689,0.3377
+XGBoost,0.4038,0.8668,0.3328
+CatBoost,0.3618,0.8407,0.2979
+LightGBM + CatBoost (average),0.3971,0.8651,0.3304
+LightGBM + XGBoost (average),0.4126,0.8722,0.3421
+All three (average),0.4092,0.8712,0.3489

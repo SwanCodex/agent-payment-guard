@@ -1,0 +1,4 @@
+set,PR-AUC,ROC-AUC,recall@1%FPR,n_features,trees
+A: all Core features,0.4013,0.8689,0.3377,48,938
+B: without long-history features,0.3825,0.8589,0.3076,38,706
+C: without any history features,0.3054,0.8495,0.2334,26,538
