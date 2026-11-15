@@ -1,0 +1,108 @@
+{
+  "tranco": {
+    "name": "tranco",
+    "source": "https://tranco-list.eu/",
+    "date": "2026-11-13",
+    "rows_total": 1000000,
+    "rows_sampled": 20000,
+    "sha256": "71d782050b0e0bdedce295ab14d2eb6e5c75d0e04cda1ac6493dce28ce6266cc",
+    "seed": 42
+  },
+  "enron": {
+    "name": "enron",
+    "source": "https://www.cs.cmu.edu/~enron/",
+    "date": "2026-11-13",
+    "rows_sampled": 5000,
+    "sha256": "b3da1b3fe0369ec3140bb4fbce94702c33b7da810ec15d718b3fadf5cd748ca7",
+    "seed": 42
+  },
+  "amazon": {
+    "name": "amazon",
+    "source": "McAuley-Lab/Amazon-Reviews-2023 (Hugging Face)",
+    "category": "All_Beauty",
+    "date": "2026-11-13",
+    "rows_sampled": 5000,
+    "seed": 42
+  },
+  "commoncrawl_html": {
+    "name": "commoncrawl_html",
+    "source": "Common Crawl WARC files",
+    "crawl": "CC-MAIN-2026-43",
+    "date": "2026-11-13",
+    "warc_files": [
+      "crawl-data/CC-MAIN-2026-43/segments/1791170344220.79/warc/CC-MAIN-20261016012506-20261016042506-00810.warc.gz",
+      "crawl-data/CC-MAIN-2026-43/segments/1791170054180.48/warc/CC-MAIN-20261007054425-20261007084425-00592.warc.gz",
+      "crawl-data/CC-MAIN-2026-43/segments/1791170053964.38/warc/CC-MAIN-20261005200620-20261005230620-00278.warc.gz",
+      "crawl-data/CC-MAIN-2026-43/segments/1791170350306.98/warc/CC-MAIN-20261017202842-20261017232842-00196.warc.gz",
+      "crawl-data/CC-MAIN-2026-43/segments/1791170054431.66/warc/CC-MAIN-20261010011051-20261010041051-00048.warc.gz",
+      "crawl-data/CC-MAIN-2026-43/segments/1791170054365.2/warc/CC-MAIN-20261009125708-20261009155708-00098.warc.gz",
+      "crawl-data/CC-MAIN-2026-43/segments/1791170054345.86/warc/CC-MAIN-20261009034247-20261009064247-00256.warc.gz",
+      "crawl-data/CC-MAIN-2026-43/segments/1791170054241.55/warc/CC-MAIN-20261007175816-20261007205816-00289.warc.gz"
+    ],
+    "rows_sampled": 1200,
+    "max_pages_per_host": 3,
+    "selection": "HTML 200 responses; shop-like = contains cart/checkout keywords",
+    "shop_only": true,
+    "seed": 42
+  },
+  "url_phishtank": {
+    "name": "url_phishtank",
+    "file": "online-valid.csv",
+    "rows_loaded": 45711,
+    "sha256": "0882555f7119f9d3d3cb8877bf3500732618fbe0ce407ab8ad530cf772a5371b",
+    "date": "2026-11-14",
+    "seed": 42
+  },
+  "url_phiusiil": {
+    "name": "url_phiusiil",
+    "file": "PhiUSIIL_Phishing_URL_Dataset.csv",
+    "rows_loaded": 235795,
+    "sha256": "a236549cd369cd80bd478ff8e1779cbf44c58d5c3f79f7a51a1adbed7d06d1c6",
+    "date": "2026-11-14",
+    "seed": 42
+  },
+  "url_tranco": {
+    "name": "url_tranco",
+    "file": "top-1m.csv",
+    "rows_loaded": 100000,
+    "sha256": "71d782050b0e0bdedce295ab14d2eb6e5c75d0e04cda1ac6493dce28ce6266cc",
+    "date": "2026-11-14",
+    "seed": 42
+  },
+  "url_commoncrawl": {
+    "name": "url_commoncrawl",
+    "file": "commoncrawl_html.jsonl",
+    "rows_loaded": 52265,
+    "sha256": "c3651d1c7b8180e61ffa97891cdd625df9039d7df36ef2469b6fcec14c86b5bd",
+    "date": "2026-11-14",
+    "seed": 42
+  },
+  "commoncrawl_urls": {
+    "name": "commoncrawl_urls",
+    "source": "Common Crawl WARC files",
+    "crawl": "CC-MAIN-2026-43",
+    "date": "2026-11-14",
+    "warc_files": [
+      "crawl-data/CC-MAIN-2026-43/segments/1791170054475.59/warc/CC-MAIN-20261010193147-20261010223147-00445.warc.gz",
+      "crawl-data/CC-MAIN-2026-43/segments/1791170054242.5/warc/CC-MAIN-20261007210144-20261008000144-00772.warc.gz",
+      "crawl-data/CC-MAIN-2026-43/segments/1791170054656.11/warc/CC-MAIN-20261011230657-20261012020657-00750.warc.gz",
+      "crawl-data/CC-MAIN-2026-43/segments/1791170346426.84/warc/CC-MAIN-20261016073418-20261016103418-00319.warc.gz",
+      "crawl-data/CC-MAIN-2026-43/segments/1791170053990.22/warc/CC-MAIN-20261006051644-20261006081644-00328.warc.gz",
+      "crawl-data/CC-MAIN-2026-43/segments/1791170054094.31/warc/CC-MAIN-20261006142707-20261006172707-00494.warc.gz",
+      "crawl-data/CC-MAIN-2026-43/segments/1791170055137.36/warc/CC-MAIN-20261014093556-20261014123556-00239.warc.gz",
+      "crawl-data/CC-MAIN-2026-43/segments/1791170054170.15/warc/CC-MAIN-20261006233730-20261007023730-00337.warc.gz",
+      "crawl-data/CC-MAIN-2026-43/segments/1791170054583.75/warc/CC-MAIN-20261011104901-20261011134901-00931.warc.gz",
+      "crawl-data/CC-MAIN-2026-43/segments/1791170057013.95/warc/CC-MAIN-20261015035910-20261015065910-00387.warc.gz",
+      "crawl-data/CC-MAIN-2026-43/segments/1791170054048.74/warc/CC-MAIN-20261006082016-20261006112016-00602.warc.gz",
+      "crawl-data/CC-MAIN-2026-43/segments/1791170054911.64/warc/CC-MAIN-20261013211541-20261014001541-00510.warc.gz",
+      "crawl-data/CC-MAIN-2026-43/segments/1791170054343.76/warc/CC-MAIN-20261009003822-20261009033822-00140.warc.gz",
+      "crawl-data/CC-MAIN-2026-43/segments/1791170053974.20/warc/CC-MAIN-20261005230946-20261006020946-00914.warc.gz",
+      "crawl-data/CC-MAIN-2026-43/segments/1791170054149.39/warc/CC-MAIN-20261006203358-20261006233358-00265.warc.gz",
+      "crawl-data/CC-MAIN-2026-43/segments/1791170054673.9/warc/CC-MAIN-20261012143428-20261012173428-00838.warc.gz"
+    ],
+    "rows_sampled": 51065,
+    "max_urls_per_host": 3,
+    "selection": "HTTP 200 text/html responses, URL only",
+    "seed": 7
+  }
+}
