@@ -124,6 +124,8 @@ def main(a):
         "training_git_dirty": training_git_dirty,
         "training_date": training_date,
         "training_note": training_note,
+        "reproducible": False,
+        "provenance_note": "weights trained from an uncommitted tree at eda414d; packaged from a dirty tree; training data is git-ignored",
         "packaging_git_sha": git("rev-parse", "HEAD"),
         "packaging_git_dirty": bool(git("status", "--porcelain")),
         "packaging_date": str(date.today()),

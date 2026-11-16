@@ -19,7 +19,7 @@ from sentinel_l1.models.url_ensemble import GBM_FEATURES, UrlEnsemble  # noqa: E
 
 REQUIRED = ["model.txt", "lr_ngram.npz", "combiner.json", "calibration.json", "thresholds.json",
             "feature_spec.yaml", "model_card.md", "eval_report.md", "manifest.json", "tld_risk.json", "brands.json"]
-CARD_HEADINGS = ["## Intended use", "## Data", "## Metrics", "## Limitations"]
+CARD_HEADINGS = ["## Intended use", "## Data", "## Metrics", "## Limitations", "## Provenance and reproducibility"]
 checks = []
 
 
@@ -67,7 +67,7 @@ def main(a):
     check("feature_spec: all serving_available", all(f["serving_available"] for f in feats))
 
     man = json.loads((art / "manifest.json").read_text(encoding="utf-8"))
-    check("manifest: required keys", {"git_sha", "seed", "data_manifest_sha256", "packages", "files"} <= set(man))
+    check("manifest: required keys", {"git_sha", "seed", "data_manifest_sha256", "packages", "files", "training_git_dirty", "reproducible"} <= set(man))
     stale = [n for n, h in man.get("files", {}).items() if not (art / n).exists() or sha256(art / n) != h]
     check("manifest: file hashes match (re-run package_bundle.py after changing files)", not stale, str(stale))
 

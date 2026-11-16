@@ -11,7 +11,16 @@ L1 combines two distinct, complementary paradigms:
 2. **Probabilistic URL Ensemble Model (`sentinel_l1/models/url_ensemble.py`)**: A dual-model machine learning ensemble that scores the phishing likelihood of input URLs based strictly on character n-grams and lexical features.
 
 ```
-Incoming Request (L1In: url, page_content, payload)
+Incoming Request (SentinelRequest)
+       │
+       ▼
+[Context Forwarding: orchestration/api/l1_context.py]
+  - Validates allowlist: page_content, page_html, invoice_pdf_b64, payee_account, payee_domain, redirect_count
+  - Rejects unknown/oversized/malformed fields without echoing content
+  - Runs L1 if request.url is set OR at least one valid context field is present
+       │
+       ▼
+L1In (url, page_content, payload)
        │
        ├─────────────────────────────────┬─────────────────────────────────┐
        ▼                                 ▼                                 ▼
@@ -36,7 +45,7 @@ Deterministic Rules (R01-R10)   URL Model Scorer (UrlEnsemble)   HTML Extraction
    - Hard BLOCK: Explicit deterministic block rules ONLY
    - STEP_UP: Rule step_up OR URL model high risk (p >= tau_block) OR unavailable model
    - ALLOW: Clean input / gray zone without flags
-   - Score: Capped at 0.60 for model risk (0.49 for p < tau_block); raw p in metadata
+   - Score: Policy contribution (capped at 0.60 for model risk; 0.49 for p < tau_block)
                         │
                         ▼
             LayerOut (Verdict, Score, Codes, Metadata)
@@ -53,7 +62,7 @@ The deterministic rules engine executes sequential, stateless inspections. Flags
 | **R01** | Unicode & Hidden Control Characters | Raw text, HTML, URL | `step_up` | `L1:R01_HIDDEN_CONTROL_CHAR`, `L1:R01_MIXED_SCRIPT` | Flags zero-width spaces (`\u200b`–`\u200f`), bidi overrides (`\u202a`–`\u202e`), word joiners (`\u2060`), and mixed-script Cyrillic/Greek/Latin within words. Allows leading BOM (`\ufeff`) and emoji ZWJ. |
 | **R02** | Hidden Webpage Text | Parsed HTML | `step_up` (flag), forwarded | `L1:R02_HIDDEN_TEXT` | Identifies hidden text via CSS (`display:none`, `visibility:hidden`, `font-size:0`, `opacity:0`, off-screen positioning). Forwards text to L2 if $\ge 15$ words; flags `step_up` if $\ge 1276$ words (99.5th percentile of Common Crawl sample). |
 | **R03** | PDF Text Divergence | Base64 PDF | `step_up` (flag), forwarded | `L1:R03_PDF_TEXT_DIVERGENCE` | Compares programmatic text layer (`pdfplumber`) against visible OCR rendering (`pytesseract`). Flags if $\ge 10$ tokens and $\ge 50\%$ missing from render. **Status: Disabled by default (`R03_ENABLED = False`)** pending dataset calibration. Returns `[], []` immediately when disabled. |
-| **R04** | IBAN Validation | Raw text, `payee_account` | `step_up` | `L1:R04_IBAN_INVALID` | Validates ISO 13616 country formats and applies the MOD-97 checksum algorithm. Scans both the explicit payee account and embedded text strings. Ignores non-IBAN formats (e.g. US account numbers). |
+| **R04** | IBAN Validation | Raw text, `payee_account` | `step_up` | `L1:R04_IBAN_INVALID` | Validates ISO 13616 country formats and applies the MOD-97 checksum algorithm. Scans both explicit payee account and embedded text strings. Ignores non-IBAN formats (e.g. US account numbers). |
 | **R05** | Payment Detail Change | Extracted text | `gray`, forwarded | `L1:R05_PAYMENT_DETAIL_CHANGE` | Flags phrases indicative of supplier bank account changes (e.g., "new bank details", "account has changed"). Forwards context window ($\pm 100$ chars) to L2. |
 | **R06** | Lookalike & Homoglyph Domains | URL, `payee_domain` | `step_up` / `gray` | `L1:R06_LOOKALIKE_DOMAIN` | Protects top brands against typo-squatting and homoglyphs. Uses skeleton normalization (`rn` $\to$ `m`, `0` $\to$ `o`, `1` $\to$ `l`), optimal string alignment edit distance ($\le 1$ for short brands $<8$ chars, $\le 2$ for brands $\ge 8$ chars), and cross-TLD matching. Genuine country-code sites (e.g. `google.in`) are permitted. |
 | **R07** | Mixed-Script Punycode | URL host | `step_up` | `L1:R07_PUNYCODE_HOST` | Decodes IDN labels (`xn--`) and checks whether multiple scripts (Latin, Cyrillic, Greek) are mixed in a single domain label. Pure single-script IDNs are permitted. |
@@ -84,134 +93,146 @@ The URL model is an ensemble trained to predict the probability that a given URL
 
 ---
 
-## 4. Model Version, Provenance & Calibration
+## 4. Context Forwarding in the Guard (`orchestration/api/l1_context.py`)
 
-- **Artifact Version**: `0.1.0` located at `artifacts/layer1/url_ensemble/0.1.0/`.
-- **Training Data**:
-  - Malicious: PhishTank verified online-valid dataset (16,370 train / 3,466 val / 3,537 test).
-  - Benign: Tranco Top-1M homepages + Common Crawl CC-MAIN-2026-43 deep URLs (104,505 train / 22,283 val / 22,430 test).
-  - Splitting: Domain-disjoint 70/15/15 split. Malicious test set is time-ordered (newest domains from 2026).
-- **Provenance Preservation**:
-  - Model weights were trained from an uncommitted tree at base commit `eda414d8a79b90db3f73abb935a33a8585fa5e5e`.
-  - `package_bundle.py` strictly preserves `training_git_sha`, `training_date`, and `training_note`, recording packaging metadata (`packaging_git_sha`, `packaging_date`) separately without overwriting training provenance.
-- **Operating Thresholds**:
-  - Allow Threshold ($\tau_{\text{allow}}$): `0.008197` (Validation malicious FNR $\le 1.0\%$).
-  - Block/High-Risk Threshold ($\tau_{\text{block}}$): `0.833333` (Validation benign FPR $\le 0.5\%$).
-  - Conformal Threshold ($q_{\text{hat}}$): `0.286064` ($\alpha = 0.10$, 90% target coverage).
-- **Evaluation Parity**:
-  - Validation: ROC-AUC `0.9374`, PR-AUC `0.7999`, Recall@0.5%FPR `44.5%`.
-  - Test: ROC-AUC `0.8958`, PR-AUC `0.6438`, Recall@0.5%FPR `18.2%`.
-  - Latency: UrlEnsemble single-URL score p95 = `0.90 ms`, `run_l1` p95 = `2.56 ms` (budget $\le 20\text{ ms}$).
+To allow L1 deterministic rules to inspect invoice data and payment attributes safely without bypassing contracts, `orchestration/api/l1_context.py` provides `build_l1_input(request)`.
 
----
+### Allowlist Specification & Limits
 
-## 5. Decision-Policy Integration & Score Mapping
+| Source Field (Precedence: transaction then metadata) | Target in `L1In` | Strict Validation Rule | Target Engine Rule |
+|---|---|---|---|
+| `metadata["page_content"]` | `page_content` | `str`, at most 1,000,000 chars | R01, R04, R05, R09 |
+| `metadata["page_html"]` | `payload["html"]` | `str`, at most 1,000,000 chars | R02, R08 |
+| `metadata["invoice_pdf_b64"]` | `payload["pdf_b64"]` | `str`, base64 charset (`^[A-Za-z0-9+/=]+$`), at most 5,000,000 chars | R03 |
+| `transaction/metadata["payee_account"]` | `payload["payee_account"]` | `str`, stripped, 1 to 64 chars, no internal whitespace | R04 |
+| `transaction/metadata["payee_domain"]` | `payload["payee_domain"]` | `str`, 1 to 253 chars, hostname charset (`^[a-zA-Z0-9.-]+$`) | R06 |
+| `metadata["redirect_count"]` | `payload["redirect_count"]` | `int` (strictly not `bool`), 0 to 50 | R10 |
 
-### Probabilistic vs Deterministic Findings:
-- **No Standalone Model Hard BLOCK**: The URL ensemble is a probabilistic heuristic signal. High URL model risk ($p \ge \tau_{\text{block}}$) emits `Verdict.STEP_UP` accompanied by reason code `"L1:URL_MODEL_HIGH_RISK"`. The model cannot unilaterally hard-block payments.
-- **L1 Score Mapping**:
-  - When $p \ge \tau_{\text{block}}$, model score contribution is `0.60` (standard step-up score).
-  - When $p < \tau_{\text{block}}$, model score contribution is $\min(p, 0.49)$ (staying within the allow range).
-  - The unmapped, calibrated probability $p$ is always preserved in `metadata["url_model"]["p"]`.
-  - L1 score is computed as `max(rule_flag_scores, model_contribution)`.
-- **Deterministic BLOCK Authority**: Only explicit deterministic rule violations with `severity == "block"` issue a hard `Verdict.BLOCK` (`score = 0.95`).
-- **Advisory Gray Zone**: Approximately 78.5% of benign URLs score between $\tau_{\text{allow}}$ and $\tau_{\text{block}}$ ($0.0082 < p < 0.8333$). This gray zone is advisory. Clean URLs in the gray zone without rule flags evaluate to `Verdict.ALLOW`.
-
-### Model Metadata Schema:
-`metadata["url_model"]` is **always** a dictionary with the following schema:
-- `status`: One of `{"ok", "unavailable", "error", "not_applicable"}`.
-- `reason`: String explanation of failure/error, or `null`.
-- `version`: String version (e.g. `"0.1.0"`), or `null`.
-- When `status == "ok"`: Also contains `p`, `z`, `gray`, `abstain`, `tau_allow`, `tau_block`.
-
-### Model-Unavailable Behavior & Fail-Safe:
-- If a request contains a URL and the model is missing, corrupt, or throws an exception during inference:
-  1. Reason code `"SYSTEM:MODEL_UNAVAILABLE"` is appended to `reason_codes`.
-  2. L1 score is set to `0.60` (fail-closed).
-  3. L1 verdict is `Verdict.STEP_UP` by default (ensuring orchestration never silently approves unscored URLs).
-  4. Metadata records `status: "unavailable"` or `status: "error"`.
-- **Local Development Opt-Out**:
-  - Setting the environment variable `SENTINEL_L1_ON_MODEL_FAILURE=allow` allows local development without downloaded model artifacts to return `Verdict.ALLOW` when no deterministic rule flags fire.
-- **Thread-Safe Cooldown**:
-  - Model loading failures are protected by a thread lock (`_MODEL_LOCK`) and retried after a 30-second cooldown period, preventing repeated failing disk I/O under high concurrency while allowing runtime recovery if artifacts are deployed.
+### Precedence & Drop Rules:
+- **First-Match Precedence**: For `payee_account` and `payee_domain`, `transaction` is evaluated first; if absent, `metadata` is checked.
+- **Fail-Safe Dropping**: Invalid or oversized fields are dropped immediately. Values are never truncated, coerced, or auto-repaired.
+- **Audit Reporting (No Echoing)**: The audit report contains forwarded field names (`["page_content", ...]`) and rejected field names with reason codes (e.g. `{"redirect_count": "TYPE_MISMATCH", "payload": "DISALLOWED_FIELD"}`). Payload content is **never** logged or echoed. Attached to `SentinelResponse.metadata["l1_context"]`.
+- **Execution Gate**: L1 is invoked if `request.url` is set **OR** if at least one valid context field is present. Requests containing only invalid/unrecognized context without a URL do not trigger L1.
 
 ---
 
-## 6. Artifact Integrity Verification at Load
+## 5. Gray-Zone Policy
 
-When `UrlEnsemble` is instantiated:
-1. It reads `manifest.json` and parses the model version.
-2. It verifies the SHA-256 hash of all 10 bundle files against `manifest["files"]`.
-3. It loads `feature_spec.yaml` and confirms that `booster.feature_name()` exactly matches the YAML feature order.
-4. If any file hash fails or feature names differ, it raises `IntegrityError("integrity_mismatch: <file>")`.
-5. `run_l1` catches this mismatch, records `status: "unavailable"`, sets `reason: "integrity_mismatch: <file>"`, and steps up with `"SYSTEM:MODEL_UNAVAILABLE"`.
+### Deliberate Policy Decision
+URLs scoring between $\tau_{\text{allow}}$ and $\tau_{\text{block}}$ ($0.008197 < p < 0.833333$) receive an L1 verdict of **`Verdict.ALLOW`**, with raw probability $p$ preserved in metadata.
 
----
+### Why This Policy Exists
+In held-out natural validation distributions, approximately **78.5% of legitimate benign URLs fall within this gray zone**. Under the conservative allow threshold ($\tau_{\text{allow}} = 0.0082$, ensuring malicious FNR $\le 1.0\%$), forcing a step-up or human arbiter escalation on all gray-zone URLs would create severe false-alarm fatigue, disrupt normal business operations, and rapidly exceed operational review budgets.
 
-## 7. Known Limitations & The Google URL Anomaly
+### Metadata Emitted
+Every URL scoring step provides full transparency in `metadata["url_model"]`:
+- `p`: Raw calibrated URL probability.
+- `z`: Combiner logit.
+- `gray`: `True` when $\tau_{\text{allow}} < p < \tau_{\text{block}}$.
+- `abstain`: `True` when conformal prediction interval is inconclusive.
+- `tau_allow`: `0.008197`
+- `tau_block`: `0.833333`
 
-1. **The Google URL Anomaly (PhishTank Brand Representation Artifact)**:
-   - *Evidence & Measurements*:
-     - In `train.csv`, URLs whose host contains "google" count 891 malicious vs 77 benign (92.0% malicious).
-     - The registered domain `google.com` in `train.csv` counts 862 malicious rows vs 5 benign rows (99.4% malicious).
-     - In `LRScorer`, the host part `'google.com'` contributes `+9.5361` to the log-odds decision for `https://www.google.com/`, producing $p_{\text{lr}} = 0.8232$, LightGBM $p_{\text{gbm}} = 0.4291$, combiner $s = 1.5883 \cdot z + 3.9714$, and calibrated $p = 0.9844 \ge \tau_{\text{block}}$.
-     - Similar high scores occur for other brand sign-in endpoints: `accounts.google.com/signin` ($p = 1.0000$), `github.com/login` ($p = 1.0000$), `netflix.com/login` ($p = 1.0000$), `dropbox.com/login` ($p = 1.0000$), and `paypal.com/signin` ($p = 0.9397$).
-   - *Mitigation*: The anomaly is **mitigated by policy (STEP_UP instead of BLOCK)** and is **not fixed in model 0.1.0**. Legitimate payments and authentications involving these domains will still trigger `STEP_UP`.
-   - *Future Fix (v0.2.0)*: Implement host-aware tokenization separating registered domain, subdomain, and path, and evaluate against a curated brand-regression test set.
-2. **External Domain Generalization**:
-   - On the out-of-distribution PhiUSIIL dataset, ROC-AUC drops to `0.661` (vs `0.896` on PhishTank test).
-3. **Disabled/Incomplete Rules**:
-   - Rule `R03` (PDF text divergence) is disabled (`config.R03_ENABLED = False`) pending real invoice PDF calibration corpora.
+### Honest Assessment of Consumption Today
+Inspection of `orchestration/decision/engine.py` demonstrates that:
+1. **No arbiter tier exists today.**
+2. The orchestration decision engine **does not read** `url_model.gray` or `url_model.abstain`.
+3. **Residual Risk**: A moderately suspicious URL (e.g. $p = 0.80$) will be permitted by L1 with `ALLOW`. Defense against such threats relies entirely on deterministic rule flags (R01–R10) and subsequent defense layers (L2 prompt injection analysis, L3 tabular fraud detection, and L3B GraphSAGE).
+4. **Future Arbiter Requirement**: A future arbiter component must be implemented to ingest `url_model.gray` alongside composite risk signals (such as high transaction amounts or anomalous payee novelty) before authorizing execution.
 
 ---
 
-## 8. Orchestration Gap Analysis
+## 6. Risk-Score Semantics
 
-In [`orchestration/api/guard_service.py`](file:///c:/Users/Shreya/Desktop/agent-payment-guard/orchestration/api/guard_service.py):
-```python
-if request.url is not None:
-    l1_input = L1In(
-        request_id=request.request_id,
-        agent_id=request.agent_id,
-        user_id=request.user_id,
-        transaction_id=request.transaction_id,
-        url=request.url,
-    )
-    outputs.append(run_l1(l1_input))
+### Policy Contribution vs Fraud Probability
+The score returned by Layer 1 (`LayerOut.score` $\in [0.0, 1.0]$) is a **policy contribution score**, NOT a calibrated fraud probability:
+- Clean allow baseline: `0.0` (or $\min(p, 0.49)$ when URL model scores below $\tau_{\text{block}}$).
+- Gray rule flag: `0.30`.
+- Model high-risk / rule step_up / model failure: `0.60`.
+- Deterministic hard block: `0.95`.
+
+The calibrated probability from the URL model on the validation mix is stored strictly in `metadata["url_model"]["p"]` and must be interpreted as:
+> *"Calibrated URL-model probability on the validation mix; not a fraud probability."*
+
+### Explicit Metadata Declarations
+Every L1 output provides:
+```json
+{
+  "score_semantics": "policy_contribution_not_a_probability",
+  "score_components": {
+    "rule_flags": 0.0,
+    "url_model_policy": 0.60
+  }
+}
 ```
-- **The Gap**: `SentinelRequest` currently lacks `page_content` or `payee` fields. Consequently, `guard_service.process_request()` passes only `url` to L1. Rules `R02` (hidden text), `R03` (PDF divergence), `R04` (payee account IBAN), `R05` (payment change text), `R08` (link mismatch HTML), and `R09` (encoded blobs in text) cannot be triggered through `/v1/guard` requests.
-- **Proposed Contract-Compatible Wiring** (for future approval):
-  Forward `page_content` and `payload` from `SentinelRequest.metadata`:
-  ```python
-  l1_input = L1In(
-      request_id=request.request_id,
-      agent_id=request.agent_id,
-      user_id=request.user_id,
-      transaction_id=request.transaction_id,
-      url=request.url,
-      page_content=request.metadata.get("page_content"),
-      payload=request.metadata.get("payload", {}),
-  )
-  ```
+In `orchestration/api/guard_service.py`, `SentinelResponse.metadata["risk_score_semantics"]` is declared as:
+`"max of per-layer policy scores; not a calibrated probability"`.
 
 ---
 
-## 9. Testing & Verification
+## 7. Model Failure Handling & Fail-Closed Behavior
 
-### Running the Test Suite
+L1 strictly enforces a **fail-closed** architecture:
+- If `request.url` is provided and the model is missing, corrupt, fails hash integrity checks, or encounters an unexpected exception:
+  1. Reason code `"SYSTEM:MODEL_UNAVAILABLE"` is appended.
+  2. L1 score is set to **`0.60`**.
+  3. L1 verdict is **`Verdict.STEP_UP`**, always.
+  4. Metadata records `status: "unavailable"` or `status: "error"`, with the exact error message in `reason`.
+- **Zero Fail-Open Overrides**: There are no environment variables or configuration switches that can force an unavailable model to return `Verdict.ALLOW`.
+- **Thread-Safe Cooldown**: Failed loads enter a thread-safe 30-second cooldown period, preventing redundant disk access and error cascades under concurrent workloads while allowing runtime recovery if missing model artifacts are restored.
+- **Context-Only Requests**: When a request has no URL (`request.url is None`), the URL model is not applicable (`status: "not_applicable"`), and failure flags are not raised.
+
+---
+
+## 8. Artifact Integrity Verification at Load
+
+When `UrlEnsemble` loads its bundle:
+1. Reads `manifest.json` and parses file hashes.
+2. Computes the SHA-256 hash of all bundle files (`model.txt`, `lr_ngram.npz`, `combiner.json`, `calibration.json`, `thresholds.json`, `feature_spec.yaml`, `model_card.md`, `eval_report.md`, `tld_risk.json`, `brands.json`).
+3. Verifies that `booster.feature_name()` in LightGBM strictly equals the feature list in `feature_spec.yaml`.
+4. If any hash fails or feature order diverges, it raises `IntegrityError("integrity_mismatch: <file>")`.
+5. `run_l1` maps this to `status: "unavailable"`, reason `"integrity_mismatch: <file>"`, reason code `"SYSTEM:MODEL_UNAVAILABLE"`, and verdict `Verdict.STEP_UP`.
+
+---
+
+## 9. Provenance and Reproducibility
+
+- **Current Bundle Status**: `reproducible: false`.
+- **Provenance Disclosures**:
+  - Model weights were trained from an uncommitted working tree at base commit `eda414d8a79b90db3f73abb935a33a8585fa5e5e` (`training_git_dirty: true`).
+  - The bundle was packaged from a dirty working tree (`packaging_git_dirty: true`).
+  - Training dataset files (`data/processed/url_dataset/`) are git-ignored.
+- **Clean-Build Requirements for v0.2.0**:
+  1. Commit and tag a clean baseline git commit for training.
+  2. Pin and hash all raw dataset snapshots. Note: In `reports/data_manifest.json`, the Tranco entry lists date `2026-11-13` and SHA-256, but **does not record the specific Tranco list ID**; clean builds must record the exact list ID.
+  3. Rerun `scripts/train_final_l1.py` inside a pinned container.
+  4. Compare parity metrics (within 0.003 tolerance).
+  5. Publish and tag the clean bundle as a new version.
+
+---
+
+## 10. The Google URL Anomaly & Mitigation
+
+1. **Root Cause**:
+   - In `train.csv`, URLs containing `google` in host count 891 malicious vs 77 benign (92.0% malicious), and registered domain `google.com` counts 862 malicious vs 5 benign (99.4% malicious).
+   - In `LRScorer`, the host string `'google.com'` contributes `+9.5361` to the log-odds decision for `https://www.google.com/`, producing $p_{\text{lr}} = 0.8232$, LightGBM $p_{\text{gbm}} = 0.4291$, combiner $s = 1.5883 \cdot z + 3.9714$, and calibrated $p = 0.9844 \ge \tau_{\text{block}}$.
+2. **Policy Mitigation**:
+   - The anomaly is **mitigated by policy (STEP_UP instead of BLOCK)** and is **not fixed in model 0.1.0**. Legitimate requests to `google.com` step up to human review with score `0.60`.
+   - Recommended v0.2.0 fix: host-aware tokenization separating registered domain, subdomain, and path, and brand regression evaluation sets.
+
+---
+
+## 11. Testing & Verification Commands
+
 ```powershell
 $env:PYTHONPATH=".;contracts;layer1_heuristics;layer3_fraud_tabular;layer3_fraud_graph"
-.\layer1_heuristics\.venv\Scripts\python.exe -m pytest -o rootdir=. --import-mode=importlib contracts/tests layer1_heuristics/tests layer3_fraud_graph/tests -v
-```
 
-### Artifact-Only Validation Procedure
-```powershell
+# 1. Full Test Suite across Contracts, L1, and Orchestration
+.\layer1_heuristics\.venv\Scripts\python.exe -m pytest -o rootdir=. --import-mode=importlib contracts/tests layer1_heuristics/tests orchestration/tests -v
+
+# 2. Artifact Integrity and Smoke Validation
 .\layer1_heuristics\.venv\Scripts\python.exe layer1_heuristics/scripts/validate_artifacts.py
-```
-Validates manifest file hashes, monotonic calibration, feature order matching LightGBM, and deterministic scoring.
 
-### Serving Parity Verification Note
-```powershell
+# 3. Serving Parity Verification against 25k Validation and Test Sets
 .\layer1_heuristics\.venv\Scripts\python.exe layer1_heuristics/scripts/verify_serving.py
 ```
-> **Reproducibility Note**: `verify_serving.py` scores the full 25,749 validation and 25,967 test rows. These processed CSV files (`data/processed/url_dataset/`) were present locally on the development machine (git-ignored) and are not reproducible from a clean clone without downloading the dataset. In environments without the processed CSVs, use `validate_artifacts.py` for artifact-only smoke verification.

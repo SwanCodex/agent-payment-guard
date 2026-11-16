@@ -24,8 +24,8 @@ Tolerance 0.003.
 
 | path | p50 ms | p95 ms | p99 ms |
 |---|---|---|---|
-| UrlEnsemble.score | 0.59 | 1.18 | 1.79 |
-| run_l1 (rules + model) | 1.65 | 2.80 | 3.44 |
+| UrlEnsemble.score | 0.46 | 0.79 | 1.15 |
+| run_l1 (rules + model) | 1.40 | 2.24 | 2.68 |
 
 Budget: URL-only model p95 <= 20 ms.
 

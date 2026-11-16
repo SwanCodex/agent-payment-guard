@@ -8,9 +8,11 @@
   "training_git_dirty": true,
   "training_date": "2026-11-15",
   "training_note": "Weights trained from uncommitted tree at base commit eda414d",
-  "packaging_git_sha": "ec28c51d79eaca2c800e269b0891c8ebc4cbee01",
+  "reproducible": false,
+  "provenance_note": "weights trained from an uncommitted tree at eda414d; packaged from a dirty tree; training data is git-ignored",
+  "packaging_git_sha": "2a0753d9c550954469ef984d80c87e1759e70dbd",
   "packaging_git_dirty": true,
-  "packaging_date": "2026-11-15",
+  "packaging_date": "2026-11-16",
   "seed": 42,
   "python": "3.13.15",
   "packages": {
@@ -32,11 +34,11 @@
     "brands.json": "db62516f346e7e6e6c476a7559b6a7ae64c6c50c9f08f2879e60dc95dcce6c54",
     "calibration.json": "f0ed2219398d87431a4e90b262216f8b471d99f4ef11372c12a6e6751c748cbb",
     "combiner.json": "20e42601592f54bfab6b17324a6e92a96c0ef04d05a378483a7e5a6f75e9d081",
-    "eval_report.md": "3bef540f78f82239194b0450d81a7f34669040fefca98160489d46ad23e194b2",
+    "eval_report.md": "296710db8e2956aa2a11f231e2b6b6fb90771b3a97355366352e97f2115dbe5c",
     "feature_spec.yaml": "82bd97cdc430e89c835b9c9a2d80f3ed051ed0f6853b416e7a9ec54e918f13d0",
     "lr_ngram.npz": "7f670671da5318381503d79a9e9652910fbb1761434e1583040bc4539a4fee0b",
     "model.txt": "f320e399ab581ec66972d95637f58b0b30df118aa4b007f5e8f164824695b8c2",
-    "model_card.md": "8c3afbee8f33cf0dd773252bfec7a3631875b7f31863ef60ec0ad88f05bdd912",
+    "model_card.md": "0c4eab034ced0da520bd016f40574bb34fd163f6f85fcbd5744a48d73fa965a0",
     "thresholds.json": "02a5e13a70f909f880f3cb0b9c240f816f0ba89bea6e4d56ea8574842815232a",
     "tld_risk.json": "5aa6fef20ab194e261710182145706f4f310589b7338c449db99ea041309d158"
   }

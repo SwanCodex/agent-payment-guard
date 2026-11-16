@@ -46,6 +46,33 @@ All numbers are from held-out real splits.
   - The anomaly is MITIGATED by policy (STEP_UP instead of BLOCK, with score mapped to 0.60 and reason code 'L1:URL_MODEL_HIGH_RISK') and NOT fixed in model 0.1.0; payments to major brands will still STEP_UP.
   - Recommended fix for v0.2.0: host-aware tokenization (registered domain vs subdomain vs path) and a brand-regression evaluation set in training.
 
+## Gray-zone policy
+- Deliberate policy decision: URLs where `tau_allow < p < tau_block` (0.0082 < p < 0.8333) yield L1 verdict `ALLOW`.
+- Rationale: In the validation split, approximately 78.5% of benign URLs fall within this gray zone under the conservative allow threshold (FNR <= 1%). Forcing a STEP_UP or human arbiter review on all gray-zone URLs would flood operational pipelines, defeat product usability, and exceed arbiter budgets.
+- Metadata fields emitted in `metadata["url_model"]`:
+  - `p`: Raw calibrated probability of phishing risk on the validation mix.
+  - `z`: Combined ensemble logit before calibration.
+  - `gray`: Boolean flag indicating `tau_allow < p < tau_block`.
+  - `abstain`: Boolean flag indicating conformal prediction uncertainty (`tau_allow < p < tau_block`).
+  - `tau_allow`: Lower threshold (0.008197).
+  - `tau_block`: Upper threshold (0.833333).
+- Consumption today in orchestration: Inspection of `orchestration/decision/engine.py` reveals that **no arbiter currently exists**, and the decision engine **does not read** `url_model.gray` or `url_model.abstain`.
+- Residual risk: A suspicious URL with probability below `tau_block` (e.g. p = 0.80) is returned as `ALLOW` by L1. Protection against such URLs relies entirely on deterministic rule flags (R01-R10) and upstream/downstream layers (L2 prompt injection defense, L3 tabular fraud detection, and L3B GraphSAGE).
+- Future requirement: Deploying an active arbiter tier that samples or selectively escalates high-risk gray-zone transactions when secondary risk factors (e.g., transaction amount, payee novelty) are present.
+
+## Provenance and reproducibility
+- Current bundle status: `reproducible: false`.
+- Provenance disclosure:
+  - Model weights were trained from an uncommitted working tree at commit `eda414d8a79b90db3f73abb935a33a8585fa5e5e` (`training_git_dirty: true`).
+  - The artifact bundle was packaged from a dirty working tree (`packaging_git_dirty: true`).
+  - Processed training datasets (`data/processed/url_dataset/`) are git-ignored and not versioned in git.
+- Remaining clean-build requirements:
+  1. Commit and tag a clean baseline commit for training.
+  2. Pin and hash all raw data snapshots. Note: In `reports/data_manifest.json`, the Tranco dataset records the download date (`2026-11-13`) and SHA-256 hash, but **does not record the specific Tranco list ID**; future clean builds must record the exact list ID.
+  3. Re-run `scripts/build_url_dataset.py` and `scripts/train_final_l1.py` in a reproducible container.
+  4. Compare metrics against the baseline within tolerance (ROC-AUC delta <= 0.003).
+  5. Publish and tag the clean reproducible bundle as a new version (e.g., `0.2.0`).
+
 ## Known gaps / not done
 - No HTML or page-content model, so rule R08 is not used by the model. Rule R03 (PDF text vs OCR) is implemented but disabled and unmeasured (no real invoice PDFs). No character CNN.
 - Rule R06 uses a 20-brand seed list, not Tranco top-N.

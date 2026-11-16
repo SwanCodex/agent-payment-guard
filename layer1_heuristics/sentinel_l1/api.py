@@ -1,5 +1,4 @@
 import json
-import os
 import threading
 import time
 from pathlib import Path
@@ -135,10 +134,7 @@ def run_l1(request: L1In) -> LayerOut:
         }
 
     block = any(f.severity == "block" for f in flags)
-
-    # Opt-out env var for local dev: SENTINEL_L1_ON_MODEL_FAILURE=allow
-    opt_out = os.environ.get("SENTINEL_L1_ON_MODEL_FAILURE", "").strip().lower() == "allow"
-    failure_forces_step_up = (model_status in ("unavailable", "error")) and (not opt_out)
+    failure_forces_step_up = model_status in ("unavailable", "error")
 
     step_up = (
         any(f.severity == "step_up" for f in flags)
@@ -152,6 +148,12 @@ def run_l1(request: L1In) -> LayerOut:
         score = max(flag_score, model_contrib)
     else:
         score = flag_score
+
+    meta["score_semantics"] = "policy_contribution_not_a_probability"
+    meta["score_components"] = {
+        "rule_flags": round(flag_score, 4),
+        "url_model_policy": round(model_contrib, 4) if model_contrib is not None else None,
+    }
 
     return LayerOut(
         layer="L1",
