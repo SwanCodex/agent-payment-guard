@@ -1,31 +1,32 @@
+
 from typing import List
 
 from sentinel_contracts import LayerOut, SentinelResponse, Verdict
 
 
-def calculate_risk_score(outputs: List[LayerOut]) -> float:
-    """
-    Combine layer scores into a single risk score.
+UNAVAILABLE_CODE = "SYSTEM:MODEL_UNAVAILABLE"
 
-    Current bootstrap implementation uses the maximum layer score.
-    This will be replaced/tuned when the real models are integrated.
-    """
+
+def calculate_risk_score(outputs: List[LayerOut]) -> float:
     if not outputs:
         return 0.0
 
     return max(output.score for output in outputs)
 
 
-def decide_verdict(risk_score: float) -> Verdict:
-    """
-    Bootstrap decision thresholds.
+def decide_verdict(outputs: List[LayerOut]) -> Verdict:
+    if not outputs:
+        return Verdict.STEP_UP
 
-    These are temporary values and are NOT final model thresholds.
-    """
-    if risk_score >= 0.80:
+    # Explicit blocks always take priority.
+    if any(output.verdict == Verdict.BLOCK for output in outputs):
         return Verdict.BLOCK
 
-    if risk_score >= 0.50:
+    # Unavailable layers must never silently approve.
+    if any(UNAVAILABLE_CODE in output.reason_codes for output in outputs):
+        return Verdict.STEP_UP
+
+    if any(output.verdict == Verdict.STEP_UP for output in outputs):
         return Verdict.STEP_UP
 
     return Verdict.ALLOW
@@ -36,10 +37,9 @@ def build_response(
     outputs: List[LayerOut],
 ) -> SentinelResponse:
     risk_score = calculate_risk_score(outputs)
-    verdict = decide_verdict(risk_score)
+    verdict = decide_verdict(outputs)
 
     reason_codes = []
-
     for output in outputs:
         reason_codes.extend(output.reason_codes)
 

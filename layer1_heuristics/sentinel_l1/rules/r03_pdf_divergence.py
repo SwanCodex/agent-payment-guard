@@ -13,6 +13,8 @@ def _tokens(s: str) -> set:
 def check_r03(pdf_b64: Optional[str]) -> Tuple[List[RuleFlag], List[dict]]:
     if not pdf_b64:
         return [], []
+    if not config.R03_ENABLED:
+        return [], []
     try:
         import pdfplumber
         import pytesseract

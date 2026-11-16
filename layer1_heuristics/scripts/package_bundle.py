@@ -93,10 +93,45 @@ def main(a):
         except Exception:                                # noqa: BLE001
             pk[n] = None
     dm = L1_DIR / "reports" / "data_manifest.json"
+
+    existing_manifest = {}
+    mpath = art / "manifest.json"
+    if mpath.exists():
+        try:
+            existing_manifest = json.loads(mpath.read_text(encoding="utf-8"))
+        except Exception:
+            existing_manifest = {}
+
+    # Preserve training provenance
+    training_git_sha = (
+        existing_manifest.get("training_git_sha")
+        or "eda414d8a79b90db3f73abb935a33a8585fa5e5e"
+    )
+    training_date = existing_manifest.get("training_date") or existing_manifest.get("created", "2026-11-15")
+    training_git_dirty = existing_manifest.get("training_git_dirty", True)
+    training_note = existing_manifest.get(
+        "training_note",
+        "Weights trained from uncommitted tree at base commit eda414d"
+    )
+
     manifest = {
-        "model": "url_ensemble", "version": a.version, "created": str(date.today()),
-        "git_sha": git("rev-parse", "HEAD"), "git_dirty": bool(git("status", "--porcelain")),
-        "seed": 42, "python": platform.python_version(), "packages": pk,
+        "model": "url_ensemble",
+        "version": a.version,
+        "created": training_date,
+        "git_sha": training_git_sha,
+        "git_dirty": training_git_dirty,
+        "training_git_sha": training_git_sha,
+        "training_git_dirty": training_git_dirty,
+        "training_date": training_date,
+        "training_note": training_note,
+        "reproducible": False,
+        "provenance_note": "weights trained from an uncommitted tree at eda414d; packaged from a dirty tree; training data is git-ignored",
+        "packaging_git_sha": git("rev-parse", "HEAD"),
+        "packaging_git_dirty": bool(git("status", "--porcelain")),
+        "packaging_date": str(date.today()),
+        "seed": 42,
+        "python": existing_manifest.get("python", platform.python_version()),
+        "packages": pk,
         "data_manifest_sha256": sha256(dm) if dm.exists() else None,
         "training_scripts": ["scripts/build_url_dataset.py", "scripts/collect_cc_urls.py",
                              "scripts/eda_url.py", "scripts/train_final_l1.py"],
