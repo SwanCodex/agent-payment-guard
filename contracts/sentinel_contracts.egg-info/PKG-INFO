@@ -1,0 +1,5 @@
+Metadata-Version: 2.4
+Name: sentinel-contracts
+Version: 0.1.0
+Summary: Shared contracts and schemas for the SENTINEL payment guard
+Requires-Python: <3.12,>=3.11

@@ -1,0 +1,7 @@
+{
+  "method": "temperature+prior_shift",
+  "T": 0.6240802675585284,
+  "delta": -4.59511985013459,
+  "deploy_prior": 0.01,
+  "train_prior": 0.5
+}
