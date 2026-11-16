@@ -7,8 +7,7 @@ import pandas as pd
 from sentinel_l3a.api import L3AScorer
 from sentinel_l3a.entity_stats import EntityStore
 from sentinel_l3a.features.history import distinct_before, make_entity_features, make_history_features
-from test_no_future_leak import make_frame
-
+from .test_no_future_leak import make_frame
 
 def make_scorer():
     scorer = L3AScorer.__new__(L3AScorer)        # no model files are needed for the history features
