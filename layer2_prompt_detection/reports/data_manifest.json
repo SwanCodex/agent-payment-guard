@@ -1,0 +1,15 @@
+{
+  "seed": 42,
+  "date": "2026-11-06",
+  "counts": {
+    "amazon_descriptions": 1500,
+    "amazon_reviews": 4000,
+    "dolly": 2500,
+    "enron": 4000,
+    "gandalf": 891,
+    "hackaprompt": 3500,
+    "mosscap": 1500,
+    "oasst1": 2000,
+    "tensor_trust": 2120
+  }
+}
