@@ -291,6 +291,7 @@ function NewPaymentModal({API,onClose,onSubmitted}) {
   const [file,setFile] = useState(null);
   const MAX_HTML_BYTES = 10 * 1024 * 1024;
   const MAX_HTML_CHARS = 100000;
+  const MAX_PDF_BYTES = 4 * 1024 * 1024; // 4 MB (Vercel limit)
 
   async function scanDocument() {
     if (!file) {
@@ -308,9 +309,13 @@ function NewPaymentModal({API,onClose,onSubmitted}) {
       let response;
       let data;
       if (mode === "pdf") {
-        const body = new FormData();
+  if (file.size > MAX_PDF_BYTES) {
+    throw new Error("PDF file exceeds the 4 MB public upload limit.");
+  }
+
+  const body = new FormData();
         body.append("file", file);
-        response = await fetch(`${API}/v1/scan_pdf`, {
+        response = await fetch(`${API}/api/v1/scan_pdf`, {
           method:"POST",
           body
         });
@@ -331,7 +336,7 @@ function NewPaymentModal({API,onClose,onSubmitted}) {
           throw new Error("HTML content exceeds the 100,000 character limit.");
         }
         const contentId = `HTML-${Date.now().toString(36).toUpperCase()}`;
-        response = await fetch(`${API}/v1/scan_content`, {
+        response = await fetch(`${API}/api/v1/scan_content`, {
           method:"POST",
           headers:{"Content-Type":"application/json"},
           body:JSON.stringify({
