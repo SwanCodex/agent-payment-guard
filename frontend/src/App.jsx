@@ -81,79 +81,37 @@ function App() {
   }, []).slice(-24);
 
   
+  
   async function loadBackendData() {
-    if (!API) {
-      setApiStatus("Disconnected");
-      setApiError("No public backend is configured.");
-      setTransactions([]);
-      setScans([]);
-      setSummary(null);
-      setReviews([]);
-      setAuditLogs([]);
-      return;
-    }
-
     try {
-      const endpoints = [
-        "/api/health",
-        "/api/transactions",
-        "/api/dashboard/summary",
-        "/api/reviews",
-        "/api/scans",
-        "/api/audit-logs"
-      ];
+      const [healthResponse, summaryResponse] = await Promise.all([
+        fetch(`${API}/api/health`, { cache: "no-store" }),
+        fetch(`${API}/api/dashboard/summary`, { cache: "no-store" })
+      ]);
 
-      const responses = await Promise.all(
-        endpoints.map(path =>
-          fetch(`${API}${path}`, { cache: "no-store" })
-        )
-      );
-
-      if (responses.some(response => !response.ok)) {
-        throw new Error("One or more backend endpoints are unavailable.");
+      if (!healthResponse.ok || !summaryResponse.ok) {
+        throw new Error("Backend endpoints are unavailable.");
       }
 
-      const [health, tx, stats, pending, scanRecords, logs] =
-        await Promise.all(responses.map(response => response.json()));
+      const [health, stats] = await Promise.all([
+        healthResponse.json(),
+        summaryResponse.json()
+      ]);
 
-      const paymentRecords = tx.map(t => ({
-        ...t,
-        recordType: "PAYMENT_PROPOSAL",
-        risk: Number(t.risk_score ?? t.risk ?? 0),
-        amount: formatAmount(t.amount, t.currency),
-        status: t.status === "AWAITING_APPROVAL" ? "REVIEW" :
-          ["EXECUTED", "ALLOWED"].includes(t.status) ? "ALLOWED" :
-          t.status === "BLOCKED" ? "BLOCKED" : t.status,
-        time: new Date(t.created_at).toLocaleTimeString(),
-        recordedAt: t.created_at
-      }));
-
-      const documentRecords = scanRecords.map(scan => ({
-        ...scan,
-        id: scan.content_id,
-        recordType: "DOCUMENT_SCAN",
-        recipient: scan.metadata?.filename || scan.source_type || "PDF document",
-        agent: "Document scanner",
-        amount: "N/A",
-        risk: Math.round(Number(scan.risk_score || 0) * 100),
-        status: scan.verdict === "ALLOW" ? "ALLOWED" :
-          scan.verdict === "BLOCK" ? "BLOCKED" :
-          scan.verdict === "STEP_UP" ? "REVIEW" : "UNAVAILABLE",
-        time: new Date(Number(scan.timestamp) * 1000).toLocaleTimeString(),
-        recordedAt: Number(scan.timestamp) * 1000
-      }));
-
-      setTransactions(
-        [...paymentRecords, ...documentRecords]
-          .sort((a, b) => new Date(b.recordedAt) - new Date(a.recordedAt))
-      );
-
-      setScans(scanRecords);
       setSummary(stats);
-      setReviews(pending);
-      setAuditLogs(logs);
-      setApiStatus(health.status === "connected" ? "Connected" : "Disconnected");
-      setApiError(health.status === "connected" ? "" : "Backend health check failed.");
+
+      // Do not expose individual records on the public dashboard.
+      setTransactions([]);
+      setScans([]);
+      setReviews([]);
+      setAuditLogs([]);
+
+      setApiStatus(
+        health.status === "connected" ? "Connected" : "Disconnected"
+      );
+      setApiError(
+        health.status === "connected" ? "" : "Backend health check failed."
+      );
 
     } catch (error) {
       setApiStatus("Disconnected");
@@ -165,6 +123,7 @@ function App() {
       setAuditLogs([]);
     }
   }
+
 
 
   React.useEffect(() => {
