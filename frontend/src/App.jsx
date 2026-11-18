@@ -169,7 +169,6 @@ function App() {
 
   React.useEffect(() => {
     loadBackendData();
-    if (SHOWCASE_MODE) return undefined;
     const timer = setInterval(loadBackendData, 5000);
     return () => clearInterval(timer);
   }, []);
@@ -230,14 +229,21 @@ function App() {
       <main className="main-area">
         <header className="topbar">
           <div className="top-left"><button className="mobile-menu" onClick={()=>setMobile(true)}><Menu/></button><span className="breadcrumb">Workspace</span><span className="crumb-slash">/</span><b>{page}</b></div>
-          <div className="top-right">{!SHOWCASE_MODE && <button className="primary-button new-payment-button" onClick={()=>setShowPaymentModal(true)}>+ New Payment</button>}<div className="live-status"><span/> {SHOWCASE_MODE ? "SHOWCASE MODE — SAMPLE DATA" : apiStatus === "Connected" ? "BACKEND CONNECTED" : "BACKEND DISCONNECTED"}</div><button className="icon-button"><Bell size={18}/><i/></button><div className="top-avatar">SD</div></div>
-        </header>
+<div className="top-right">
+  {apiStatus === "Connected" && (
+    <button className="primary-button new-payment-button" onClick={() => setShowPaymentModal(true)}>
+      + New Payment
+    </button>
+  )}
+  <div className="live-status">
+    <span />
+    {apiStatus === "Connected" ? "BACKEND CONNECTED" : "BACKEND DISCONNECTED"}
+  </div>
+  <button className="icon-button"><Bell size={18}/><i/></button>
+  <div className="top-avatar">SD</div>
+</div>        </header>
 
         <div className="content">
-          {SHOWCASE_MODE && <div className="card info-card" style={{marginBottom:16,border:"1px solid #b98b43"}}>
-            <strong>SHOWCASE MODE — ILLUSTRATIVE DATA</strong>
-            <p style={{marginBottom:0}}>This public preview uses sample records and illustrative security-layer outcomes. No live backend, model inference, payment processing, or audit recording is active.</p>
-          </div>}
           {apiError && <div className="card info-card">Backend: {apiError}</div>}
           {page==="Overview" ? <>
             <div className="page-heading"><div><div className="eyebrow">SECURITY COMMAND CENTER</div><h1>Overview</h1><p>Monitor autonomous payment activity and AI-driven threat detection.</p></div><div className="heading-date"><Activity size={15}/> LIVE MONITOR <span>•</span> BACKEND DATA</div></div>
@@ -278,13 +284,15 @@ function App() {
             <div className="page-heading"><div><div className="eyebrow">RECORDED EVENTS</div><h1>Audit Logs</h1><p>Backend-recorded document scans and payment proposal decisions.</p></div></div>
             <div className="card table-card"><div className="table-toolbar"><span className="table-count">{auditLogs.length} recorded events</span></div><AuditLogTable rows={auditLogs}/></div>
           </> : page==="Agent Activity" ? <>
-            {SHOWCASE_MODE ? <section className="card info-card">
-              <div className="eyebrow">READ-ONLY SHOWCASE</div>
-              <h2>Agent Security Demonstrations</h2>
-              <p>The local SENTINEL project includes five interactive demonstrations covering unguarded agent behaviour, guarded detection, invoice scanning, step-up verification and multi-format input.</p>
-              <p>These demonstrations require the SENTINEL backend and model services, which are not connected to this public preview.</p>
-              <p><strong>No live agent execution or payment action is available in showcase mode.</strong></p>
-            </section> : <AgentPlayground API={API} onSubmitted={loadBackendData}/>}
+            {apiStatus === "Connected" ? (
+  <AgentPlayground API={API} onSubmitted={loadBackendData} />
+) : (
+  <section className="card info-card">
+    <h2>Agent Security Demonstrations</h2>
+    <p>A backend connection is required to run live agent demonstrations.</p>
+    <p>No sample or simulated activity is being displayed.</p>
+  </section>
+)}
           </> : <>
             <div className="page-heading"><div><div className="eyebrow">SYSTEM CONFIGURATION</div><h1>{page}</h1><p>Platform configuration and system information.</p></div></div>
             <div className="card info-card"><h3>SENTINEL development environment</h3><p>Frontend connected to the live backend records and security pipeline.</p></div>
@@ -294,8 +302,13 @@ function App() {
         </div>
       </main>
 
-      {!SHOWCASE_MODE && showPaymentModal && <NewPaymentModal API={API} onClose={()=>setShowPaymentModal(false)} onSubmitted={loadBackendData}/>}
-      {selected&&<div className="modal-backdrop" onClick={()=>setSelected(null)}><div className="detail-modal" onClick={e=>e.stopPropagation()}><div className="modal-head"><div><div className="eyebrow">{selected.recordType}</div><h2>{selected.id}</h2></div><button className="icon-button" onClick={()=>setSelected(null)}><X/></button></div><div className="modal-amount">{selected.amount}</div><Status value={selected.status}/><div className="modal-details">{[["Record type",selected.recordType],["Source",selected.recipient],["Risk score",`${selected.risk}%`],["Timestamp",selected.time]].map(([k,v])=><div key={k}><span>{k}</span><b>{v}</b></div>)}</div><p className="modal-note">This record was returned by the SENTINEL backend. No payment action is initiated from this view.</p><button className="primary-button full" onClick={()=>setSelected(null)}>Close details</button></div></div>}
+{apiStatus === "Connected" && showPaymentModal && (
+  <NewPaymentModal
+    API={API}
+    onClose={() => setShowPaymentModal(false)}
+    onSubmitted={loadBackendData}
+  />
+)}      {selected&&<div className="modal-backdrop" onClick={()=>setSelected(null)}><div className="detail-modal" onClick={e=>e.stopPropagation()}><div className="modal-head"><div><div className="eyebrow">{selected.recordType}</div><h2>{selected.id}</h2></div><button className="icon-button" onClick={()=>setSelected(null)}><X/></button></div><div className="modal-amount">{selected.amount}</div><Status value={selected.status}/><div className="modal-details">{[["Record type",selected.recordType],["Source",selected.recipient],["Risk score",`${selected.risk}%`],["Timestamp",selected.time]].map(([k,v])=><div key={k}><span>{k}</span><b>{v}</b></div>)}</div><p className="modal-note">This record was returned by the SENTINEL backend. No payment action is initiated from this view.</p><button className="primary-button full" onClick={()=>setSelected(null)}>Close details</button></div></div>}
     </div>
   );
 }
