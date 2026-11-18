@@ -50,8 +50,7 @@ function App() {
   const [apiStatus,setApiStatus] = useState("Connecting");
   const [apiError,setApiError] = useState("");
   const [showPaymentModal,setShowPaymentModal] = useState(false);
-  const API = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8001";
-  const SHOWCASE_MODE = import.meta.env.VITE_SHOWCASE_MODE === "true";
+  const API = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/+$/, "");
 
   const distribution = [
     {name:"Low risk",value:summary?.risk_distribution?.low ?? 0,color:"#32d6a0"},
@@ -81,66 +80,42 @@ function App() {
     return points;
   }, []).slice(-24);
 
+  
   async function loadBackendData() {
-    if (SHOWCASE_MODE) {
-      const now = Date.now();
-      const sampleTransactions = [
-        {id:"SAMPLE-TX-001",recordType:"PAYMENT_PROPOSAL",recipient:"Northstar Office Supplies",amount:"₹4,800.00",risk:18,status:"ALLOWED",time:new Date(now-600000).toLocaleTimeString(),recordedAt:now-600000},
-        {id:"SAMPLE-TX-002",recordType:"DOCUMENT_SCAN",recipient:"Invoice — Meridian Trading",amount:"N/A",risk:91,status:"BLOCKED",time:new Date(now-1800000).toLocaleTimeString(),recordedAt:now-1800000},
-        {id:"SAMPLE-TX-003",recordType:"PAYMENT_PROPOSAL",recipient:"Aster Technologies",amount:"₹28,500.00",risk:57,status:"REVIEW",time:new Date(now-3600000).toLocaleTimeString(),recordedAt:now-3600000},
-        {id:"SAMPLE-TX-004",recordType:"DOCUMENT_SCAN",recipient:"Purchase order — Demo",amount:"N/A",risk:12,status:"ALLOWED",time:new Date(now-5400000).toLocaleTimeString(),recordedAt:now-5400000}
-      ];
-
-      setTransactions(sampleTransactions);
-      setSummary({
-        transactions_analyzed:126,
-        threats_detected:18,
-        payments_protected:145000,
-        payments_protected_currency:"INR",
-        pending_reviews:4,
-        risk_distribution:{low:68,medium:22,high:10}
-      });
-      setReviews([
-        {id:"SAMPLE-REVIEW-001"},
-        {id:"SAMPLE-REVIEW-002"},
-        {id:"SAMPLE-REVIEW-003"},
-        {id:"SAMPLE-REVIEW-004"}
-      ]);
-      setScans([{
-        content_id:"SAMPLE-SCAN-001",
-        verdict:"STEP_UP",
-        risk_score:0.57,
-        layers:[
-          {layer:"L1",verdict:"ALLOW",reason_codes:[]},
-          {layer:"L2",verdict:"ALLOW",reason_codes:[]},
-          {layer:"L3A",verdict:"STEP_UP",reason_codes:[]},
-          {layer:"L3B",verdict:"STEP_UP",reason_codes:[]}
-        ]
-      }]);
-      setAuditLogs([
-        {id:"SAMPLE-EVT-001",record_type:"PAYMENT_PROPOSAL",verdict:"ALLOW",status:"SIMULATED",risk_score:18,timestamp:new Date(now-600000).toISOString(),reason_codes:["SAMPLE_DATA"]},
-        {id:"SAMPLE-EVT-002",record_type:"DOCUMENT_SCAN",verdict:"BLOCK",status:"SIMULATED",risk_score:91,timestamp:new Date(now-1800000).toISOString(),reason_codes:["SAMPLE_DATA","ILLUSTRATIVE_THREAT"]},
-        {id:"SAMPLE-EVT-003",record_type:"PAYMENT_PROPOSAL",verdict:"STEP_UP",status:"SIMULATED",risk_score:57,timestamp:new Date(now-3600000).toISOString(),reason_codes:["SAMPLE_DATA","HUMAN_REVIEW"]},
-        {id:"SAMPLE-EVT-004",record_type:"DOCUMENT_SCAN",verdict:"ALLOW",status:"SIMULATED",risk_score:12,timestamp:new Date(now-5400000).toISOString(),reason_codes:["SAMPLE_DATA"]}
-      ]);
-      setApiStatus("Showcase");
-      setApiError("");
+    if (!API) {
+      setApiStatus("Disconnected");
+      setApiError("No public backend is configured.");
+      setTransactions([]);
+      setScans([]);
+      setSummary(null);
+      setReviews([]);
+      setAuditLogs([]);
       return;
     }
 
     try {
-      const responses = await Promise.all([
-        fetch(`${API}/api/health`),
-        fetch(`${API}/api/transactions`),
-        fetch(`${API}/api/dashboard/summary`),
-        fetch(`${API}/api/reviews`),
-        fetch(`${API}/api/scans`),
-        fetch(`${API}/api/audit-logs`)
-      ]);
-      if (responses.some(r => !r.ok)) throw new Error("API request failed");
-      const [health, tx, stats, pending, scanRecords, logs] = await Promise.all(
-        responses.map(r => r.json())
+      const endpoints = [
+        "/api/health",
+        "/api/transactions",
+        "/api/dashboard/summary",
+        "/api/reviews",
+        "/api/scans",
+        "/api/audit-logs"
+      ];
+
+      const responses = await Promise.all(
+        endpoints.map(path =>
+          fetch(`${API}${path}`, { cache: "no-store" })
+        )
       );
+
+      if (responses.some(response => !response.ok)) {
+        throw new Error("One or more backend endpoints are unavailable.");
+      }
+
+      const [health, tx, stats, pending, scanRecords, logs] =
+        await Promise.all(responses.map(response => response.json()));
+
       const paymentRecords = tx.map(t => ({
         ...t,
         recordType: "PAYMENT_PROPOSAL",
@@ -152,6 +127,7 @@ function App() {
         time: new Date(t.created_at).toLocaleTimeString(),
         recordedAt: t.created_at
       }));
+
       const documentRecords = scanRecords.map(scan => ({
         ...scan,
         id: scan.content_id,
@@ -166,19 +142,30 @@ function App() {
         time: new Date(Number(scan.timestamp) * 1000).toLocaleTimeString(),
         recordedAt: Number(scan.timestamp) * 1000
       }));
-      setTransactions([...paymentRecords, ...documentRecords]
-        .sort((a, b) => new Date(b.recordedAt) - new Date(a.recordedAt)));
+
+      setTransactions(
+        [...paymentRecords, ...documentRecords]
+          .sort((a, b) => new Date(b.recordedAt) - new Date(a.recordedAt))
+      );
+
       setScans(scanRecords);
       setSummary(stats);
       setReviews(pending);
       setAuditLogs(logs);
       setApiStatus(health.status === "connected" ? "Connected" : "Disconnected");
-      setApiError("");
+      setApiError(health.status === "connected" ? "" : "Backend health check failed.");
+
     } catch (error) {
       setApiStatus("Disconnected");
       setApiError(error.message);
+      setTransactions([]);
+      setScans([]);
+      setSummary(null);
+      setReviews([]);
+      setAuditLogs([]);
     }
   }
+
 
   React.useEffect(() => {
     loadBackendData();
